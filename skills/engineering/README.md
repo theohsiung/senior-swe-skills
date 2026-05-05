@@ -28,3 +28,4 @@ Skills I use daily for code work, ordered by where they fit in the typical workf
 - **[triage](./triage/SKILL.md)** — Move existing issues through a state machine of triage roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`).
 - **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)** — Find deepening opportunities in **existing** code (refactor). Pre-design module shape is `/design-like-senior`.
 - **[zoom-out](./zoom-out/SKILL.md)** — Tell the agent to zoom out and give broader context or a higher-level perspective on an unfamiliar section of code.
+- **[where-am-i](./where-am-i/SKILL.md)** — Read-only inspection of workflow artifacts (`architecture.md`, ADRs, `CONTEXT.md`, `design.md`, plans, issues, git) that reports project status and recommends the next skill to run. Use when resuming after a break or unsure what to run next.
