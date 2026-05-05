@@ -90,8 +90,11 @@ Side effects happen inline as decisions crystallize:
 
 Once the user accepts a deepening recommendation, tell them:
 
-> Recommendation accepted (CONTEXT.md / ADR updated as needed). Next steps to actually perform the refactor:
+> Recommendation accepted (CONTEXT.md / ADR updated as needed). Before refactoring, decide where the safety net lives — deepening changes module-public interfaces by definition, so any existing tests at that level **will** break with it and aren't a real safety net.
 >
-> - **Behavior is well covered by existing tests** — `/tdd` self-directed mode against the affected modules. The existing tests are your safety net.
-> - **Behavior is under-tested** — first add characterization tests for the current behavior (run `/tdd` to write them), then refactor with the safety net in place.
+> Pick one of:
+>
+> - **Tests already exist at a higher seam** (system-public — HTTP, CLI, end-to-end — see [`docs/skill-contracts.md` §3](../../../docs/skill-contracts.md)) — those survive the refactor. Run `/tdd` self-directed mode against the affected modules; existing system-public tests are the safety net.
+> - **Tests only exist at module-public** — first **lift** the safety net up: write characterization tests at the system-public level (run `/tdd` self-directed to author them), confirm green, *then* perform the deepening. The module-public tests will break during the deepening; that's expected and correct.
+> - **Behavior is genuinely untested** — write characterization tests at the system-public level first (run `/tdd`), then deepen.
 > - **Refactor is project-level (system shape change)** — stop and re-run `/think-like-senior` in update mode; this is bigger than a deepening pass.

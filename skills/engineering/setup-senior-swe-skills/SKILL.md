@@ -1,6 +1,6 @@
 ---
 name: setup-senior-swe-skills
-description: Sets up an `## Agent skills` block in AGENTS.md/CLAUDE.md and `docs/agents/` so the engineering skills know this repo's issue tracker (GitHub or local markdown), triage label vocabulary, and domain doc layout. Run before first use of `to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, or `zoom-out` — or if those skills appear to be missing context about the issue tracker, triage labels, or domain docs.
+description: Sets up an `## Agent skills` block in AGENTS.md and/or CLAUDE.md plus `docs/agents/` so the engineering skills know this repo's project doc paths, issue tracker (GitHub, GitLab, or local markdown), triage label vocabulary, and domain doc layout. Run once per repo before using any other engineering skill, or whenever those skills appear to be missing config context.
 disable-model-invocation: true
 ---
 
@@ -8,18 +8,22 @@ disable-model-invocation: true
 
 Scaffold the per-repo configuration that the engineering skills assume:
 
-- **Issue tracker** — where issues live (GitHub by default; local markdown is also supported out of the box)
+- **Project doc paths** — where `architecture.md`, `docs/adr/`, `docs/features/`, `docs/plans/`, `docs/prd/`, `CONTEXT.md`, and `.out-of-scope/` live (single-root vs monorepo)
+- **Issue tracker** — where issues live (GitHub, GitLab, or local markdown out of the box)
 - **Triage labels** — the strings used for the five canonical triage roles
-- **Domain docs** — where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
+- **Domain docs layout** — single-context vs multi-context (the same info as paths, but in domain terms — kept for backwards compatibility with skills that read `domain.md`)
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
+See [`docs/skill-contracts.md` §1, §6, §7](../../../docs/skill-contracts.md) for the cross-skill agreements this skill establishes.
+
 ## Outputs
 
-- **`AGENTS.md` or `CLAUDE.md`** — an `## Agent skills` block pointing to the three docs below. Edit whichever already exists; never create one when the other is present.
+- **`CLAUDE.md` and/or `AGENTS.md`** — an `## Agent skills` block pointing to the docs below. See [Step 4 — Write](#4-write) for the dual-file rules.
+- **`docs/agents/paths.md`** — single source of truth for project doc paths (architecture, ADRs, features, plans, PRDs, context, out-of-scope). Read first by every other engineering skill.
 - **`docs/agents/issue-tracker.md`** — which tracker the consuming skills should read/write, and the CLI/convention to use.
 - **`docs/agents/triage-labels.md`** — mapping from canonical triage roles to the label strings actually used in the tracker.
-- **`docs/agents/domain.md`** — where `CONTEXT.md` and `docs/adr/` live for this repo (single-context vs multi-context).
+- **`docs/agents/domain.md`** — single-context vs multi-context layout summary (consumer rules for reading domain docs).
 
 This skill does NOT modify code, write `docs/architecture.md`, or touch the issue tracker. It only writes config files that other skills read.
 
@@ -38,11 +42,23 @@ Look at the current repo to understand its starting state. Read whatever exists;
 
 ### 2. Present findings and ask
 
-Summarise what's present and what's missing. Then walk the user through the three decisions **one at a time** — present a section, get the user's answer, then move to the next. Don't dump all three at once.
+Summarise what's present and what's missing. Then walk the user through the four decisions **one at a time** — present a section, get the user's answer, then move to the next. Don't dump all four at once.
 
 Assume the user does not know what these terms mean. Each section starts with a short explainer (what it is, why these skills need it, what changes if they pick differently). Then show the choices and the default.
 
-**Section A — Issue tracker.**
+**Section A — Project doc paths.**
+
+> Explainer: The senior-swe skills write and read a handful of files (architecture doc, ADRs, feature designs, master plans, PRDs, glossary, out-of-scope). They need to know **where** those live. Most repos put everything at the root; monorepos with multiple bounded contexts often want each package to own its own architecture doc, ADRs, and glossary.
+
+Default posture: detect the layout from the repo and propose.
+
+- If a `CONTEXT.md` is at the root and no `CONTEXT-MAP.md` exists → propose **single-root**.
+- If a `CONTEXT-MAP.md` exists at the root, or the repo looks like a monorepo (multiple `package.json` / `pyproject.toml` etc. under `packages/` or `src/<context>/`) → propose **monorepo / multi-context** and ask which packages need their own paths.
+- If neither marker is present → propose **single-root** with the defaults from [paths.md](./paths.md).
+
+Show the user the resolved YAML before moving on. They can override any key.
+
+**Section B — Issue tracker.**
 
 > Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-issues`, `triage`, `to-prd`, and `qa` read from and write to it — they need to know whether to call `gh issue create`, write a markdown file under `.scratch/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
 
@@ -53,7 +69,7 @@ Default posture: these skills were designed for GitHub. If a `git remote` points
 - **Local markdown** — issues live as files under `.scratch/<feature>/` in this repo (good for solo projects or repos without a remote)
 - **Other** (Jira, Linear, etc.) — ask the user to describe the workflow in one paragraph; the skill will record it as freeform prose
 
-**Section B — Triage label vocabulary.**
+**Section C — Triage label vocabulary.**
 
 > Explainer: When the `triage` skill processes an incoming issue, it moves it through a state machine — needs evaluation, waiting on reporter, ready for an AFK agent to pick up, ready for a human, or won't fix. To do that, it needs to apply labels (or the equivalent in your issue tracker) that match strings *you've actually configured*. If your repo already uses different label names (e.g. `bug:triage` instead of `needs-triage`), map them here so the skill applies the right ones instead of creating duplicates.
 
@@ -67,7 +83,7 @@ The five canonical roles:
 
 Default: each role's string equals its name. Ask the user if they want to override any. If their issue tracker has no existing labels, the defaults are fine.
 
-**Section C — Domain docs.**
+**Section D — Domain docs layout.**
 
 > Explainer: Some skills (`improve-codebase-architecture`, `diagnose`, `tdd`) read a `CONTEXT.md` file to learn the project's domain language, and `docs/adr/` for past architectural decisions. They need to know whether the repo has one global context or multiple (e.g. a monorepo with separate frontend/backend contexts) so they look in the right place.
 
@@ -80,27 +96,33 @@ Confirm the layout:
 
 Show the user a draft of:
 
-- The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/agents/domain.md`
+- The `## Agent skills` block to add to `CLAUDE.md` / `AGENTS.md` (see step 4 for the dual-file rules)
+- The contents of `docs/agents/paths.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/agents/domain.md`
 
 Let them edit before writing.
 
 ### 4. Write
 
-**Pick the file to edit:**
+**Pick the file(s) to edit:**
 
-- If `CLAUDE.md` exists, edit it.
-- Else if `AGENTS.md` exists, edit it.
-- If neither exists, ask the user which one to create — don't pick for them.
+Different agent harnesses read different files: Claude Code reads `CLAUDE.md`, Codex / Aider / many open-source agents read `AGENTS.md`. When the same repo is used with more than one harness, writing to only one of these files leaves the other harness blind to the setup.
 
-Never create `AGENTS.md` when `CLAUDE.md` already exists (or vice versa) — always edit the one that's already there.
+Rules:
 
-If an `## Agent skills` block already exists in the chosen file, update its contents in-place rather than appending a duplicate. Don't overwrite user edits to the surrounding sections.
+- If **both** `CLAUDE.md` and `AGENTS.md` exist → write the same `## Agent skills` block into **both** (or, if the user prefers, keep one as a `symlink` to the other; ask).
+- If **only one** exists → ask the user: "I see `<file>` already. Will you also use this repo with an agent that reads the other one (e.g., Codex with AGENTS.md, or Claude Code with CLAUDE.md)? If yes, I'll write to both."
+- If **neither** exists → ask which file(s) to create.
+
+If an `## Agent skills` block already exists in either file, update its contents in-place rather than appending a duplicate. Don't overwrite user edits to the surrounding sections.
 
 The block:
 
 ```markdown
 ## Agent skills
+
+### Project doc paths
+
+[one-line summary — "single-root" or "monorepo (N packages)"]. See `docs/agents/paths.md`.
 
 ### Issue tracker
 
@@ -115,8 +137,9 @@ The block:
 [one-line summary of layout — "single-context" or "multi-context"]. See `docs/agents/domain.md`.
 ```
 
-Then write the three docs files using the seed templates in this skill folder as a starting point:
+Then write the four docs files using the seed templates in this skill folder as a starting point:
 
+- [paths.md](./paths.md) — project doc paths (single-root or monorepo)
 - [issue-tracker-github.md](./issue-tracker-github.md) — GitHub issue tracker
 - [issue-tracker-gitlab.md](./issue-tracker-gitlab.md) — GitLab issue tracker
 - [issue-tracker-local.md](./issue-tracker-local.md) — local-markdown issue tracker

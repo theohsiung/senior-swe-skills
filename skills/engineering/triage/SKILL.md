@@ -15,12 +15,13 @@ Every comment or issue posted to the issue tracker during triage **must** start 
 
 ## Inputs to read first
 
-1. **The issue itself** — body, comments, labels, reporter, dates. Parse any prior triage notes so you don't re-ask resolved questions.
-2. **`docs/agents/triage-labels.md`** — the canonical-role-to-actual-label mapping. Without this, you may apply a label string the project doesn't actually use.
-3. **`docs/agents/issue-tracker.md`** — to know which CLI to call (`gh`, `glab`, or local markdown).
-4. **`CONTEXT.md` and `docs/adr/`** — for vocabulary and prior decisions when grilling.
-5. **`.out-of-scope/*.md`** — surface any prior rejection that resembles this issue before treating it as fresh.
-6. **The codebase** — when reproducing bugs (read code, run tests, attempt repro).
+1. **`docs/agents/paths.md`** — resolves `context`, `adr_root`, and `out_of_scope` paths for this repo (single-root or per-package in monorepos). Falls back to defaults (`CONTEXT.md`, `docs/adr/`, `.out-of-scope/`) if missing. See [`docs/skill-contracts.md` §6](../../../docs/skill-contracts.md).
+2. **The issue itself** — body, comments, labels, reporter, dates. Parse any prior triage notes so you don't re-ask resolved questions. If the body has a `## Plan tasks` section (from `/to-issues`), preserve it through state transitions — it's how `/write-plan <issue#>` enters filter mode later.
+3. **`docs/agents/triage-labels.md`** — the canonical-role-to-actual-label mapping. Without this, you may apply a label string the project doesn't actually use.
+4. **`docs/agents/issue-tracker.md`** — to know which CLI to call (`gh`, `glab`, or local markdown).
+5. **`CONTEXT.md` and `docs/adr/`** (paths from `paths.md`) — for vocabulary and prior decisions when grilling.
+6. **`.out-of-scope/*.md`** (path from `paths.md`) — surface any prior rejection that resembles this issue before treating it as fresh.
+7. **The codebase** — when reproducing bugs (read code, run tests, attempt repro).
 
 ## Outputs
 

@@ -15,7 +15,7 @@ Read whichever of these exist, in this order:
 
 1. **PRD** for this feature — usually in the issue tracker (the `/to-prd` output) or in conversation context. Source of product intent and acceptance criteria.
 2. **`docs/features/<slug>/design.md`** — the technical design from `/design-like-senior`. Source of module placement, public interfaces, and schema increments. Use this for the technical content of each issue.
-3. **`docs/plans/YYYY-MM-DD-<slug>.md`** — if a plan from `/write-plan` exists, use it as the raw task list. Group adjacent tasks into vertical slices instead of inventing the slicing from scratch.
+3. **`docs/plans/<slug>.md`** — if a master plan from `/write-plan` exists, use it as the raw task list. Group adjacent **cycles** (`T-NNN`) into **slices** instead of inventing the slicing from scratch. Record each slice's task-ID range in the issue body so `/write-plan <issue#>` can run in filter mode later. (Legacy `YYYY-MM-DD-<slug>.md` plans are also valid input — treat as the master plan.)
 4. The user may also pass an issue reference (number, URL, path) as an argument — fetch its body and comments.
 
 If only the PRD exists (no design.md, no plan), proceed but the issues will be coarser; recommend running `/design-like-senior` first.
@@ -32,17 +32,20 @@ This skill does NOT write `docs/plans/*` (use `/write-plan` for execution plans)
 
 Read the inputs above. Use the project's domain glossary (`CONTEXT.md`) for vocabulary, and respect ADRs in the area you're touching.
 
-### 2. Draft vertical slices
+### 2. Draft slices
 
-Break the plan into **tracer bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.
+Break the feature into **slices** (see [`docs/skill-contracts.md` §2](../../../docs/skill-contracts.md) — slice = hours-to-days, cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer).
+
+When a master plan exists, group adjacent cycles (`T-NNN`) into slices. Don't reinvent the breakdown — the cycles already exist; you're choosing where to draw shipping boundaries between them.
 
 Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an architectural decision or a design review. AFK slices can be implemented and merged without human interaction. Prefer AFK over HITL where possible.
 
-<vertical-slice-rules>
+<slice-rules>
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
 - Prefer many thin slices over few thick ones
-</vertical-slice-rules>
+- When a master plan exists, every cycle (`T-NNN`) belongs to exactly one slice — no orphans, no double-counts
+</slice-rules>
 
 ### 3. Quiz the user
 
@@ -79,11 +82,18 @@ A reference to the parent issue on the issue tracker (if the source was an exist
 - **PRD:** [link to PRD issue, if separate from the parent]
 - **ADRs in scope:** [list any ADRs the implementer must respect]
 
-This section lets a future implementer (human or AFK agent) bootstrap context. When they pick up the issue and run `/write-plan`, the slug is right here.
+## Plan tasks
+
+- **Master plan:** `docs/plans/<slug>.md`
+- **This slice covers:** `T-NNN .. T-NNN` (or comma-separated list `T-NNN, T-NNN, T-NNN`)
+
+If no master plan exists yet, write "Master plan: not yet — run `/write-plan` first when picking this up". The implementer authors the plan, then updates this section.
+
+Together these two sections let a future implementer (human or AFK agent) bootstrap full context: design.md for the shape, master plan + task-ID range for the cycles to execute. `/write-plan <issue#>` reads the latter and runs in filter mode.
 
 ## What to build
 
-A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation.
+A concise description of this slice. Describe the end-to-end behavior, not layer-by-layer implementation.
 
 ## Acceptance criteria
 
@@ -124,8 +134,8 @@ Stop and surface the problem instead of producing issues, when:
 
 Tell the user:
 
-> N issues published to <tracker>, each tagged `needs-triage` and linked via "Blocked by". Next steps:
+> N issues published to <tracker>, each tagged `needs-triage`, linked via "Blocked by", and (when a master plan exists) carrying a `## Plan tasks` reference to the master plan + `T-NNN` range. Next steps:
 >
-> - **When you (or someone else) picks up an issue** — run `/write-plan <issue#>` to derive a behavior-driven TDD plan from the design referenced in the issue body, then `/tdd` to execute.
+> - **When you (or someone else) picks up an issue** — run `/write-plan <issue#>` (it runs in **filter mode** when the issue references a master plan: it reads the master, prints only this slice's cycles, never writes a divergent plan), then `/tdd` to execute.
 > - **To manage the backlog** — use `/triage` for state transitions (`needs-triage` → `ready-for-agent` / `ready-for-human` / `wontfix`).
-> - **If you discover gaps in the design while breaking things down** — re-run `/design-like-senior` for the affected feature; the plan and issues should follow that update.
+> - **If you discover gaps in the design while breaking things down** — re-run `/design-like-senior` for the affected feature. New cycles are appended to the master plan with fresh IDs (never renumber); existing slice references stay valid.

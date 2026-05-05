@@ -1,6 +1,6 @@
 ---
 name: think-like-senior
-description: Senior-style architecture pass for a new project (or a major architectural pivot). Walks constraints → load-bearing decisions → system architecture → data model → resilience defaults → code style, producing `docs/architecture.md` and ADRs. Use proactively whenever the user is starting a new project, evaluating a tech stack from scratch, planning a major refactor or rewrite, weighing monolith vs microservices, asking "is this going to scale", "how should we structure this", "what's the right architecture for X", or describing work as "system design" / "architecture review" / "I'm thinking about how to lay this out" — even when they don't say the word "architecture" outright. Run this once per project before `/to-prd`, not per feature — per-feature design is `/design-like-senior`. Skip for one-shot tech questions like "Postgres or MySQL" — those don't need the full pass.
+description: Senior-style architecture pass for a new project (or a major architectural pivot). Walks constraints → load-bearing decisions → system architecture → data model → resilience defaults → code style, producing `docs/architecture.md` and ADRs. Use proactively whenever the user is starting a new project, evaluating a tech stack from scratch, planning a major refactor or rewrite, weighing monolith vs microservices, asking "is this going to scale", "how should we structure this", "what's the right architecture for X", or describing work as "system design" / "architecture review" / "I'm thinking about how to lay this out" — even when they don't say the word "architecture" outright. Run this once per project, typically after `/grill-with-docs` (so vocabulary is solid) and before `/to-prd` — not per feature; per-feature design is `/design-like-senior`. Skip entirely for one-shot tech questions like "Postgres or MySQL" or trivial throwaway scripts — those don't need the full pass.
 ---
 
 <what-to-do>
@@ -29,7 +29,7 @@ For a fresh project, the only input is the conversation. For an existing project
 Create lazily — only when there's something to write:
 
 - `docs/architecture.md` — single snapshot of the architecture (constraints, system shape, data model patterns, resilience defaults).
-- `docs/adr/NNNN-*.md` — one ADR per load-bearing decision. Use the format and "all three must be true" filter from [grill-with-docs/ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md).
+- `docs/adr/NNNN-*.md` — one ADR per load-bearing decision. File via the protocol in [grill-with-docs/ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md) (number allocation goes through `scripts/next-adr-number.sh`).
 - Linter / formatter config files for the detected language (Step 8, mechanical).
 - Observability stack boilerplate for the detected language (Step 7a, mechanical).
 
@@ -178,15 +178,9 @@ Only ask the user when:
 
 ## When to offer an ADR
 
-Same triple test as `/grill-with-docs`. All three must be true:
+Apply the triple test and follow the protocol in [`../grill-with-docs/ADR-FORMAT.md`](../grill-with-docs/ADR-FORMAT.md). Don't restate the test here.
 
-1. **Hard to reverse** — the cost of changing your mind later is meaningful.
-2. **Surprising without context** — a future reader will look at the code and wonder why.
-3. **The result of a real trade-off** — there were genuine alternatives.
-
-Use [grill-with-docs/ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md) for the file format.
-
-For this skill specifically, candidates that almost always pass the test:
+In this skill specifically, candidates that almost always pass:
 
 - The Step 1 load-bearing decisions (auth model, tenancy, primary store).
 - The Step 2 system shape choice (monolith vs services etc.).
