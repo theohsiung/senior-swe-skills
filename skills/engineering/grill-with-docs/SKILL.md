@@ -94,13 +94,9 @@ Don't couple `CONTEXT.md` to implementation details. Only include terms that are
 
 ### Offer ADRs sparingly
 
-Only offer to create an ADR when all three are true:
+When a load-bearing **domain** decision is resolved (term boundary, ownership of a concept, integration pattern between contexts), apply the triple test and follow the protocol in [ADR-FORMAT.md](./ADR-FORMAT.md). Don't restate either here.
 
-1. **Hard to reverse** — the cost of changing your mind later is meaningful
-2. **Surprising without context** — a future reader will wonder "why did they do it this way?"
-3. **The result of a real trade-off** — there were genuine alternatives and you picked one for specific reasons
-
-If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
+In this skill specifically, ADR candidates that often pass: bounded-context boundaries, ownership of an entity that crosses contexts, integration patterns (events vs sync), naming choices that codify a non-obvious distinction.
 
 ## After this skill
 

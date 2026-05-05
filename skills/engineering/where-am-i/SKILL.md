@@ -1,6 +1,6 @@
 ---
 name: where-am-i
-description: Use when resuming work after a break, starting a fresh session on an in-progress project, or unsure which senior-swe skill to run next. Scans the canonical workflow artifacts (`docs/architecture.md`, `docs/adr/`, `CONTEXT.md`, `docs/features/<slug>/design.md`, `docs/plans/<slug>.md`), open issues, and recent git activity, then reports what's done, what's partial or stale, and which skill (`/think-like-senior`, `/grill-with-docs`, `/to-prd`, `/design-like-senior`, `/write-plan`, `/to-issues`, `/tdd`, `/diagnose`) is the right next step. Read-only by design — never writes a state file, because artifacts on disk are the single source of truth. Triggered by phrases like "where did we leave off", "what should I run next", "is this feature ready for /tdd", "what's the status of <feature>".
+description: Use when resuming work after a break, starting a fresh session on an in-progress project, or unsure which senior-swe skill to run next. Scans the canonical workflow artifacts (`docs/architecture.md`, `docs/adr/`, `CONTEXT.md`, `docs/features/<slug>/design.md`, `docs/plans/<slug>.md`), open issues with their `## Plan tasks` ranges, and recent git activity, then reports what's done, what's partial or stale, and which skill (`/think-like-senior`, `/grill-with-docs`, `/to-prd`, `/design-like-senior`, `/write-plan`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/improve-codebase-architecture`) is the right next step. Read-only by design — never writes a state file, because artifacts on disk are the single source of truth. Triggered by phrases like "where did we leave off", "what should I run next", "is this feature ready for /tdd", "what's the status of <feature>".
 ---
 
 <what-to-do>
@@ -36,7 +36,7 @@ Per feature (one set per feature in flight — find them by listing `docs/featur
 |---|---|
 | `docs/prd/<slug>.md` (or PRD on issue tracker) | `/to-prd` ran. |
 | `docs/features/<slug>/design.md` | `/design-like-senior` ran. |
-| `docs/plans/<slug>.md` | `/write-plan` ran. Read it and cross-reference against test files / `git log` to estimate which behaviors already have tests. Don't trust checkboxes alone — they may not be maintained. |
+| `docs/plans/<slug>.md` (master plan, stable T-NNN IDs; legacy `YYYY-MM-DD-<slug>.md` also valid) | `/write-plan` ran. Read it and cross-reference against test files / `git log` / open issues' `## Plan tasks` ranges to estimate which cycles already have tests. Don't trust checkboxes alone — they may not be maintained. |
 | Open issues with the feature label | `/to-issues` ran. Count open vs closed. |
 
 System signals: `git status`, `git log --oneline -20`, test files matching `<slug>`.
@@ -44,17 +44,24 @@ System signals: `git status`, `git log --oneline -20`, test files matching `<slu
 ## Decision tree
 
 ```
-architecture.md missing or skeletal?           → /think-like-senior
-architecture.md exists, CONTEXT.md thin?       → /grill-with-docs
-feature mentioned, no PRD?                     → /to-prd <slug>
-PRD exists, no design.md?                      → /design-like-senior <slug>
-design.md exists, no plan, no backlog tickets? → ask: /write-plan (now) or /to-issues (later)
-plan exists, behaviors not covered by tests?   → /tdd <slug>  (resume from first uncovered)
-plan fully implemented, tests green?           → next feature, or /improve-codebase-architecture
-hard bug surfaced?                             → /diagnose
+architecture.md missing or skeletal?               → /think-like-senior
+architecture.md exists, CONTEXT.md thin?           → /grill-with-docs
+feature mentioned, no PRD?                         → /to-prd <slug>
+PRD exists, no design.md?                          → /design-like-senior <slug>
+design.md exists, no plan, no backlog tickets?     → ask: /write-plan (now) or /to-issues (later)
+master plan exists, no issues yet?                 → /to-issues  (only if backlog desired)
+issues exist, all in needs-triage?                 → /triage    (drain the queue)
+issues triaged ready-for-agent / ready-for-human,  → /write-plan <issue#>  (filter mode if
+  none in progress?                                  master plan present), then /tdd
+plan exists, cycles not covered by tests?          → /tdd <slug>  (resume from first uncovered)
+all cycles green, tests passing?                   → next feature, or /improve-codebase-architecture
+multiple issues blocked on same parent?            → list dependency chain; ask which to unblock
+hard bug surfaced?                                 → /diagnose  (self-contained — does NOT chain to /tdd)
 ```
 
 If multiple features are mid-flight, give each its own row and recommendation, then ask which to pick up.
+
+When reading the master plan, cross-reference open issues and their `## Plan tasks: T-NNN..T-NNN` ranges to estimate what's still on the backlog vs in flight vs done. Don't trust plan checkboxes alone — they may not be maintained; rely on test files + git log + issue state.
 
 ## Detecting stale artifacts
 

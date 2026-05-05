@@ -93,9 +93,10 @@ These are junior moves that pollute the PRD. Catch them before publishing:
 
 ## Stop conditions
 
-- The conversation doesn't contain enough material to write a non-trivial PRD — stop and recommend `/grill-with-docs` first.
-- The proposed feature contradicts an existing ADR — stop, surface the ADR, and ask the user to confirm before producing a PRD that overrides it.
-- The product constraints would invalidate decisions in `docs/architecture.md` (e.g., new SLA the architecture can't meet) — stop and recommend re-running `/think-like-senior` in update mode.
+- **Vocabulary gap** — `CONTEXT.md` has fewer than ~5 non-stub entries OR the conversation introduces 2+ domain terms that aren't in `CONTEXT.md` and don't map cleanly to existing ones. Stop and recommend `/grill-with-docs` first; come back to `/to-prd` when the glossary is solid enough that user stories use canonical terms throughout.
+- **No conversation context** — the user hasn't stated a problem, a user, or a desired outcome anywhere in the current conversation, and the codebase doesn't make it self-evident. Stop and ask one focused question, or recommend `/grill-with-docs`.
+- **Existing ADR contradiction** — the proposed feature contradicts an existing ADR. Stop, surface the ADR, and ask the user to confirm before producing a PRD that overrides it.
+- **Architecture invalidation** — the product constraints would invalidate decisions in `docs/architecture.md` (e.g., new SLA the architecture can't meet). Stop and recommend re-running `/think-like-senior` in update mode.
 
 ## After this skill
 

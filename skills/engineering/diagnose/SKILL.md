@@ -115,3 +115,15 @@ Required before declaring done:
 - [ ] The hypothesis that turned out correct is stated in the commit / PR message — so the next debugger learns
 
 **Then ask: what would have prevented this bug?** If the answer involves architectural change (no good test seam, tangled callers, hidden coupling) hand off to the `/improve-codebase-architecture` skill with the specifics. Make the recommendation **after** the fix is in, not before — you have more information now than when you started.
+
+## After this skill
+
+This skill is **self-contained**: Phase 5 already wrote the regression test and Phase 6 cleaned up. Do **not** route the user to `/tdd` next — that would re-do the RED→GREEN you just completed.
+
+Tell the user:
+
+> Bug fixed and regression test landed (or absence-of-seam documented). Suggested next steps:
+>
+> - **If Phase 6 surfaced an architectural smell** — run `/improve-codebase-architecture` against the affected modules so the bug class becomes structurally hard to repeat.
+> - **If the bug exposed a missing PRD/design clause** (e.g., an undocumented edge case the user actually cares about) — re-run `/to-prd` or `/design-like-senior` for the affected feature.
+> - **Otherwise** — done. Next feature or next ticket.

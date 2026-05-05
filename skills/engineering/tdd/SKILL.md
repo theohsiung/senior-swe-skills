@@ -11,16 +11,19 @@ description: Execute test-first development cycle by cycle. In plan-mode, read a
 
 ### 1. Load plan (or fall back)
 
-Look for a plan file in `docs/plans/` matching this feature.
+Look for the master plan in `docs/plans/<slug>.md` matching this feature. (Legacy `YYYY-MM-DD-<slug>.md` plans are also valid.)
 
-**If a plan exists:**
+**If invoked from an issue with a `## Plan tasks` section:**
+- Run `/write-plan <issue#>` first to filter the master plan to this slice's `T-NNN` range. Use the filtered output as the task list.
+
+**If a master plan exists (no issue scope):**
 - Read it critically — does it match the current codebase state?
 - Surface any questions or contradictions to the user before starting
-- Create a todo item per task in the plan
+- Create a todo item per task (use the `T-NNN` ID — preserved from the plan)
 - Skip to **Step 2: Plan-mode execution**
 
 **If no plan exists:**
-- Tell the user: "No plan file found. I can either run `/write-plan` first, or self-direct (I'll plan as I go)."
+- Tell the user: "No master plan found. I can either run `/write-plan` first, or self-direct (I'll plan as I go)."
 - If they choose self-direct: skip to **Step 2': Self-directed execution**
 
 ### 2. Plan-mode execution
@@ -51,7 +54,9 @@ After each batch, stop and report:
 - An instruction contradicts the current codebase state
 - Verification fails more than once on the same step
 - **The behavior description is too vague to derive a test from** — ask the user to sharpen it (or re-run `/write-plan`'s review gate)
-- **The behavior can only be verified by peeking behind the public interface** (e.g., direct DB query, spying on internal calls) — that's a design problem, not a test problem. Stop and recommend `/design-like-senior` to widen the interface.
+- **The behavior can only be verified by peeking behind the public interface** (e.g., direct DB query, spying on internal calls) — that's a design problem, not a test problem. Recommend:
+  - `/improve-codebase-architecture` if the affected interface already exists in code (typical mid-feature case — code is real, the seam is too narrow)
+  - `/design-like-senior` only if the interface is purely on paper and not yet implemented
 
 Don't guess through blockers — ask.
 
@@ -121,6 +126,8 @@ Consult this whenever writing or reviewing a test, regardless of mode.
 ### Behavior, not implementation
 
 **Core principle:** Tests verify behavior through public interfaces, not implementation details. Code can change entirely; tests shouldn't.
+
+**Which "public"?** See [`docs/skill-contracts.md` §3](../../../docs/skill-contracts.md). Default to **system-public** (the surface a real caller hits — HTTP endpoint, CLI, message-bus event, scheduled job entry). Drop to **module-public** only when `design.md` or the plan task explicitly tags that level for a behavior — typically a pure domain calculation with no system-public path of its own.
 
 **Good tests** are integration-style: they exercise real code paths through public APIs. They describe _what_ the system does, not _how_ it does it. A good test reads like a specification — "user can checkout with valid cart" tells you exactly what capability exists. These tests survive refactors because they don't care about internal structure.
 

@@ -168,20 +168,16 @@ The right move: tell the user, name the specific architecture decision that's wr
 
 ## When to file an ADR
 
-Same triple test as `/grill-with-docs` and `/think-like-senior`. All three must be true:
+Apply the triple test and follow the protocol in [`../grill-with-docs/ADR-FORMAT.md`](../grill-with-docs/ADR-FORMAT.md). Don't restate the test here.
 
-1. Hard to reverse — the cost of changing your mind later is meaningful
-2. Surprising without context — a future reader will wonder why
-3. The result of a real trade-off — there were genuine alternatives
-
-For this skill specifically, candidates that often pass:
+In this skill specifically, candidates that often pass:
 
 - A new module's charter (its responsibility and what it explicitly does NOT own)
 - An interface choice with a non-obvious shape (e.g., async + outbox where one would expect sync)
 - A schema decision that materially constrains future features (e.g., partition key choice on a new table)
 - A feature-level deviation from project-level resilience defaults
 
-Do NOT file ADRs for routine interface design, naming choices, or "we picked the obvious approach". Save ADRs for the decisions that future-you will thank present-you for documenting.
+Do NOT file ADRs for routine interface design, naming choices, or "we picked the obvious approach". Save ADRs for decisions a future engineer will need to *not re-litigate*.
 
 ## Pushback discipline
 
