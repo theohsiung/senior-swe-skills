@@ -15,6 +15,15 @@ Do **not** cover application-internal layering, module boundaries, or class/func
 
 <supporting-info>
 
+## Inputs to read first
+
+For a fresh project, the only input is the conversation. For an existing project, scan before deciding anything:
+
+1. **`docs/architecture.md`** — if present, switch to **update mode**: read it, surface what looks stale or contradicted by current code, and only discuss those gaps. Do NOT rewrite from scratch.
+2. **`docs/adr/`** — read titles to know what's already been decided. Don't re-litigate without surfacing the existing ADR first.
+3. **`CONTEXT.md`** — for canonical vocabulary; use the project's terms, not generic ones.
+4. **The codebase top level** — language, package manager, deploy target. The Phase A constraints discussion goes faster when the obvious facts are already on the table.
+
 ## Output artifacts
 
 Create lazily — only when there's something to write:
@@ -206,5 +215,15 @@ The biggest failure mode of an architecture-design skill is over-engineering sma
 - **Throwaway prototype with explicit deletion date**: skip ADRs entirely; just write 3 lines into `architecture.md` and stop.
 
 When skipping, say so out loud with the constraint that drove the skip. The user can override.
+
+## After this skill
+
+Tell the user:
+
+> Architecture pass complete. `docs/architecture.md` and N ADRs are now the project anchor. Next steps:
+>
+> - **Per feature work** — start with `/to-prd` to capture product intent, then `/design-like-senior` for the technical shape.
+> - **Domain alignment** — if business terminology still feels fuzzy, run `/grill-with-docs` before `/to-prd`.
+> - **Update mode** — re-run this skill if the project takes on a major architectural pivot.
 
 </supporting-info>

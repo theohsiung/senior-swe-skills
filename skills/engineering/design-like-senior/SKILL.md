@@ -1,6 +1,6 @@
 ---
 name: design-like-senior
-description: Per-feature design pass that runs between `/to-prd` (which produces the feature's PRD) and `/to-issues` (which splits it into vertical slices). Walks application architecture (where the feature plugs in), module boundaries (Ousterhout deep modules), and public-interface design (signatures, not implementations) — anchoring every recommendation to the project's `docs/architecture.md` and ADRs from `/think-like-senior`. Use proactively whenever the user has a PRD or issue and is asking "where does this go", "what should the API look like", "should this be a new module", "how do I structure this feature", "what files do I create", or describing the work as "feature design", "tech design doc", "design review before coding". Run once per feature before `/to-issues`. Does NOT make project-level decisions (those are `/think-like-senior`) and does NOT design class internals (those emerge from `/tdd`'s refactor step).
+description: Per-feature design pass that runs after `/to-prd` and before any of `/write-plan`, `/to-issues`, or `/tdd`. Walks application architecture (where the feature plugs in), module boundaries (Ousterhout deep modules), and public-interface design (signatures, not implementations) — anchoring every recommendation to the project's `docs/architecture.md` and ADRs from `/think-like-senior`. Produces `docs/features/<slug>/design.md` that downstream skills (`/write-plan`, `/to-issues`) read. Use proactively whenever the user has a PRD or issue and is asking "where does this go", "what should the API look like", "should this be a new module", "how do I structure this feature", "what files do I create", or describing the work as "feature design", "tech design doc", "design review before coding". Run once per feature. Does NOT make project-level decisions (those are `/think-like-senior`) and does NOT design class internals (those emerge from `/tdd`'s refactor step).
 ---
 
 <what-to-do>
@@ -203,5 +203,16 @@ The biggest failure mode of a feature-design skill is over-engineering small fea
 - **Bug fix where the fix is local** — out of scope; go straight to `/diagnose` then `/tdd`.
 
 When skipping, say so out loud with the constraint that drove the skip. The user can override.
+
+## After this skill
+
+Tell the user:
+
+> Design saved to `docs/features/<slug>/design.md`. Next steps depend on how you want to ship this:
+>
+> - **Execute now (single session):** run `/write-plan` to derive a behavior-driven TDD plan, then `/tdd` to execute cycle by cycle.
+> - **Build a backlog (team / async pickup):** run `/to-issues` to break this design into vertical-slice tickets. Each ticket gets its own `/write-plan` when picked up.
+> - **Both:** run `/write-plan` first to expose the breakdown, then `/to-issues` to group adjacent behaviors into shippable slices. Tickets reference back to the plan.
+> - **Tiny feature, no plan needed:** go straight to `/tdd` self-directed mode — it will read this design.md.
 
 </supporting-info>

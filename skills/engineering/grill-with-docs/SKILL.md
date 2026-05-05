@@ -1,19 +1,36 @@
 ---
 name: grill-with-docs
-description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (CONTEXT.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions.
+description: Domain-first grilling session — stress-test a plan against the project's domain language and documented decisions, sharpening terminology and updating CONTEXT.md/ADRs inline. Run before /to-prd or /design-like-senior whenever new domain concepts emerge or existing terminology gets fuzzy. Focus is business/domain language and load-bearing decisions, not technical module design — for module/interface design use /design-like-senior.
 ---
 
 <what-to-do>
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview me relentlessly about every aspect of this plan **at the domain level** until we reach a shared understanding of the business concepts and their relationships. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
 
 Ask the questions one at a time, waiting for feedback on each question before continuing.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
 
+**Scope guardrail:** focus on domain meaning (what an "Order" is, when it gets "cancelled", what "tenant" means here). Stop at terminology and load-bearing domain decisions — module placement, interface design, and schema details belong in `/design-like-senior`.
+
 </what-to-do>
 
 <supporting-info>
+
+## Inputs to read first
+
+1. **`CONTEXT.md`** (or `CONTEXT-MAP.md` + per-context files) — the canonical glossary. If it exists, every term you propose must reconcile with it. If it doesn't, you'll create it lazily as the first term resolves.
+2. **`docs/adr/*.md`** — past load-bearing decisions. Don't re-litigate them without surfacing the existing ADR first.
+3. **The codebase** — when a domain claim can be answered by reading code (e.g., "are Orders cancelled atomically?"), read code instead of asking.
+
+## Outputs
+
+Created lazily — only when there's something to write:
+
+- **`CONTEXT.md`** updates: one entry per resolved term. Use [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md). Append in place; don't batch at the end.
+- **`docs/adr/NNNN-*.md`**: one ADR per load-bearing _domain_ decision that passes the triple test (hard to reverse, surprising without context, real trade-off). Use [ADR-FORMAT.md](./ADR-FORMAT.md).
+
+This skill does NOT write to `docs/architecture.md`, `docs/features/*/design.md`, or `docs/plans/*` — those belong to `/think-like-senior`, `/design-like-senior`, and `/write-plan` respectively.
 
 ## Domain awareness
 
@@ -84,5 +101,17 @@ Only offer to create an ADR when all three are true:
 3. **The result of a real trade-off** — there were genuine alternatives and you picked one for specific reasons
 
 If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
+
+## After this skill
+
+Once alignment is reached, tell the user:
+
+> CONTEXT.md and ADRs updated. The vocabulary is now stable enough to continue with whatever brought us here:
+>
+> - If we were aligning before writing a PRD → run `/to-prd`.
+> - If we were aligning before technical design → run `/design-like-senior`.
+> - If we were aligning during a refactor → resume `/improve-codebase-architecture`.
+
+This skill doesn't pick the next step on its own — what comes next depends on the original intent.
 
 </supporting-info>

@@ -1,10 +1,10 @@
 ---
-name: setup-matt-pocock-skills
+name: setup-senior-swe-skills
 description: Sets up an `## Agent skills` block in AGENTS.md/CLAUDE.md and `docs/agents/` so the engineering skills know this repo's issue tracker (GitHub or local markdown), triage label vocabulary, and domain doc layout. Run before first use of `to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, or `zoom-out` — or if those skills appear to be missing context about the issue tracker, triage labels, or domain docs.
 disable-model-invocation: true
 ---
 
-# Setup Matt Pocock's Skills
+# Setup Senior SWE Skills
 
 Scaffold the per-repo configuration that the engineering skills assume:
 
@@ -13,6 +13,15 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Domain docs** — where `CONTEXT.md` and ADRs live, and the consumer rules for reading them
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
+
+## Outputs
+
+- **`AGENTS.md` or `CLAUDE.md`** — an `## Agent skills` block pointing to the three docs below. Edit whichever already exists; never create one when the other is present.
+- **`docs/agents/issue-tracker.md`** — which tracker the consuming skills should read/write, and the CLI/convention to use.
+- **`docs/agents/triage-labels.md`** — mapping from canonical triage roles to the label strings actually used in the tracker.
+- **`docs/agents/domain.md`** — where `CONTEXT.md` and `docs/adr/` live for this repo (single-context vs multi-context).
+
+This skill does NOT modify code, write `docs/architecture.md`, or touch the issue tracker. It only writes config files that other skills read.
 
 ## Process
 

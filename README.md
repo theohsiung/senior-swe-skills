@@ -25,17 +25,61 @@ If you want to keep up with changes to these skills, and any new ones I create, 
 1. Run the skills.sh installer:
 
 ```bash
-npx skills@latest add mattpocock/skills
+npx skills@latest add theohsiung/senior-swe-skills
 ```
 
-2. Pick the skills you want, and which coding agents you want to install them on. **Make sure you select `/setup-matt-pocock-skills`**.
+2. Pick the skills you want, and which coding agents you want to install them on. **Make sure you select `/setup-senior-swe-skills`**.
 
-3. Run `/setup-matt-pocock-skills` in your agent. It will:
+3. Run `/setup-senior-swe-skills` in your agent. It will:
    - Ask you which issue tracker you want to use (GitHub, Linear, or local files)
    - Ask you what labels you apply to ticks when you triage them (`/triage` uses labels)
    - Ask you where you want to save any docs we create
 
 4. Bam - you're ready to go.
+
+## How the skills compose
+
+The senior-design skills (`/think-like-senior`, `/design-like-senior`, `/write-plan`) layer on top of the original Matt Pocock workflow. Use what fits your project's complexity.
+
+```
+ONCE PER REPO
+  /setup-senior-swe-skills        → docs/agents/* + AGENTS.md/CLAUDE.md
+
+ONCE PER PROJECT (optional, skip for trivial projects)
+  /think-like-senior              → docs/architecture.md + project ADRs
+
+ANYTIME (when domain terms emerge or get fuzzy)
+  /grill-with-docs                → CONTEXT.md + domain ADRs
+
+PER FEATURE
+  [conversation / brainstorm]
+        ↓
+  /to-prd                         → product PRD on issue tracker
+        ↓
+  /design-like-senior             → docs/features/<slug>/design.md
+        ↓
+  ┌─────────────────────────┬──────────────────────────────┐
+  ↓                         ↓                              ↓
+  /write-plan               /to-issues                     /write-plan
+  → docs/plans/             → backlog tickets              ↓
+  (behavior list,           (vertical slices,              /to-issues
+   no test code)             hours/days each)               (chain)
+  ↓                         ↓                              ↓
+  /tdd                      (later) /write-plan → /tdd     /tdd
+  (immediate execution,     (asynchronous pickup)
+   derives tests at
+   execution time)
+```
+
+Pick the right downstream:
+
+- **`/write-plan` only** — small feature, you'll execute now. Behavior list → /tdd, done.
+- **`/to-issues` only** — backlog work, multi-dev or AFK agent will pick it up later. Each issue gets its own /write-plan when worked on.
+- **Both, chained (`/write-plan` → `/to-issues`)** — you want a TDD-cycle behavior list _and_ a shippable backlog. Plan first reveals the breakdown; issues group adjacent behaviors into vertical slices.
+
+Note: `/write-plan` produces a **behavior list**, not pre-written test code. `/tdd` derives the actual test for each cycle at execution time, looking at the just-passed code. This is the "don't outrun your headlights" discipline from Matt's `/tdd` skill — pre-writing tests in bulk is an anti-pattern.
+
+Maintenance skills (`/diagnose`, `/triage`, `/improve-codebase-architecture`, `/zoom-out`) run ad-hoc, independent of this flow.
 
 ## Why These Skills Exist
 
@@ -129,7 +173,8 @@ For debugging, I've also built a **[`/diagnose`](./skills/engineering/diagnose/S
 
 This is built in to every layer of these skills:
 
-- [`/to-prd`](./skills/engineering/to-prd/SKILL.md) quizzes you about which modules you're touching before creating a PRD
+- [`/think-like-senior`](./skills/engineering/think-like-senior/SKILL.md) walks the project-level architecture pass once at the start, anchoring everything that follows
+- [`/design-like-senior`](./skills/engineering/design-like-senior/SKILL.md) makes you walk module boundaries and public-interface design per feature, before any code is written
 - [`/zoom-out`](./skills/engineering/zoom-out/SKILL.md) tells the agent to explain code in the context of the whole system
 
 And crucially, [`/improve-codebase-architecture`](./skills/engineering/improve-codebase-architecture/SKILL.md) helps you rescue a codebase that has become a ball of mud. I recommend running it on your codebase once every few days.
@@ -145,15 +190,16 @@ Software engineering fundamentals matter more than ever. These skills are my bes
 Skills I use daily for code work.
 
 - **[diagnose](./skills/engineering/diagnose/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
-- **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates `CONTEXT.md` and ADRs inline.
+- **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Domain-first grilling session that sharpens terminology and updates `CONTEXT.md` / ADRs inline. Focus is business language, not technical module design (that's `/design-like-senior`).
 - **[triage](./skills/engineering/triage/SKILL.md)** — Triage issues through a state machine of triage roles.
-- **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Find deepening opportunities in a codebase, informed by the domain language in `CONTEXT.md` and the decisions in `docs/adr/`.
-- **[setup-matt-pocock-skills](./skills/engineering/setup-matt-pocock-skills/SKILL.md)** — Scaffold the per-repo config (issue tracker, triage label vocabulary, domain doc layout) that the other engineering skills consume. Run once per repo before using `to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, or `zoom-out`.
-- **[tdd](./skills/engineering/tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
+- **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Find deepening opportunities in **existing** code (refactor). For shaping a new feature's modules before any code is written, use `/design-like-senior` instead.
+- **[setup-senior-swe-skills](./skills/engineering/setup-senior-swe-skills/SKILL.md)** — Scaffold the per-repo config (issue tracker, triage label vocabulary, domain doc layout) that the other engineering skills consume. Run once per repo before using `to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, or `zoom-out`.
+- **[tdd](./skills/engineering/tdd/SKILL.md)** — Execute a TDD implementation: read a plan from `/write-plan` and run task-by-task with red-green-refactor, or self-direct if no plan exists.
 - **[think-like-senior](./skills/engineering/think-like-senior/SKILL.md)** — Senior-style architecture pass for a new project (or major architectural pivot). Walks constraints → load-bearing decisions → system architecture → data model → resilience → code style, producing `docs/architecture.md` and ADRs. Run once per project before `/to-prd`.
-- **[design-like-senior](./skills/engineering/design-like-senior/SKILL.md)** — Per-feature design pass between `/to-prd` and `/tdd`. Walks application architecture (where this feature plugs in), module boundaries, and public-interface design. Anchors recommendations to `architecture.md` + ADRs from `/think-like-senior`.
-- **[to-issues](./skills/engineering/to-issues/SKILL.md)** — Break any plan, spec, or PRD into independently-grabbable GitHub issues using vertical slices.
-- **[to-prd](./skills/engineering/to-prd/SKILL.md)** — Turn the current conversation context into a PRD and submit it as a GitHub issue. No interview — just synthesizes what you've already discussed.
+- **[design-like-senior](./skills/engineering/design-like-senior/SKILL.md)** — Per-feature design pass that runs after `/to-prd` and before any of `/write-plan`, `/to-issues`, or `/tdd`. Walks application architecture (where this feature plugs in), module boundaries, and public-interface design. Produces `docs/features/<slug>/design.md` that downstream skills read. Anchored to `architecture.md` + ADRs.
+- **[to-issues](./skills/engineering/to-issues/SKILL.md)** — Break a feature into independently-grabbable backlog tickets (each = a vertical slice taking hours/days). Reads PRD + `design.md` + `docs/plans/`. Different from `/write-plan`, which produces task-level steps for immediate execution; the two can chain.
+- **[to-prd](./skills/engineering/to-prd/SKILL.md)** — Turn the current conversation context into a **product** PRD (user intent, acceptance criteria, out-of-scope). No technical design — that's `/design-like-senior`.
+- **[write-plan](./skills/engineering/write-plan/SKILL.md)** — Turn a feature design into a behavior-driven TDD plan. Lists behaviors, public interfaces, and anti-patterns to refuse — _not_ pre-written test code. `/tdd` derives the actual test from the behavior at execution time. For backlog tickets, use `/to-issues` instead; the two can chain.
 - **[zoom-out](./skills/engineering/zoom-out/SKILL.md)** — Tell the agent to zoom out and give broader context or a higher-level perspective on an unfamiliar section of code.
 
 ### Productivity

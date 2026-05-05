@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
+description: Find deepening opportunities in EXISTING code, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable. **Different from /design-like-senior**: this skill operates on code that already exists (refactor); /design-like-senior shapes a new feature's modules before any code is written (forward design). Run periodically as the codebase grows.
 ---
 
 # Improve Codebase Architecture
@@ -27,6 +27,22 @@ Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
 - **One adapter = hypothetical seam. Two adapters = real seam.**
 
 This skill is _informed_ by the project's domain model. The domain language gives names to good seams; ADRs record decisions the skill should not re-litigate.
+
+## Inputs to read first
+
+1. **`CONTEXT.md`** — for domain vocabulary. Every deepening suggestion must name modules using these terms (e.g. "the Order intake module"), not generic ones ("the FooBarHandler").
+2. **`docs/adr/`** — surface existing decisions before suggesting refactors that contradict them. If a candidate refactor reopens an ADR, mark it explicitly.
+3. **`docs/architecture.md`** (if present) — the project-level shape. Don't suggest deepening that conflicts with the documented system architecture without flagging it.
+4. **The codebase, area by area** — use the Explore agent. Don't apply rigid heuristics; explore organically.
+
+## Outputs
+
+Created only when the user accepts a recommendation:
+
+- **`CONTEXT.md`** updates — when a deepened module needs a name not yet in the glossary, add it (same discipline as `/grill-with-docs`).
+- **`docs/adr/NNNN-*.md`** — when the user rejects a candidate with a load-bearing reason that future explorers will need to avoid re-suggesting the same thing.
+
+This skill does NOT itself perform refactors or write code. It surfaces opportunities and discusses them; the actual refactor goes through `/tdd` (or directly, with the user's preferred discipline) afterwards.
 
 ## Process
 
@@ -69,3 +85,13 @@ Side effects happen inline as decisions crystallize:
 - **Sharpening a fuzzy term during the conversation?** Update `CONTEXT.md` right there.
 - **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones. See [ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md).
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md).
+
+## After this skill
+
+Once the user accepts a deepening recommendation, tell them:
+
+> Recommendation accepted (CONTEXT.md / ADR updated as needed). Next steps to actually perform the refactor:
+>
+> - **Behavior is well covered by existing tests** — `/tdd` self-directed mode against the affected modules. The existing tests are your safety net.
+> - **Behavior is under-tested** — first add characterization tests for the current behavior (run `/tdd` to write them), then refactor with the safety net in place.
+> - **Refactor is project-level (system shape change)** — stop and re-run `/think-like-senior` in update mode; this is bigger than a deepening pass.
