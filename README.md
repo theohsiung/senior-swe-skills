@@ -81,6 +81,8 @@ Note: `/write-plan` produces a **behavior list**, not pre-written test code. `/t
 
 Maintenance skills (`/diagnose`, `/triage`, `/improve-codebase-architecture`, `/zoom-out`) run ad-hoc, independent of this flow.
 
+Lost your place? Run `/where-am-i` — it reads the artifacts (`architecture.md`, ADRs, `design.md`, plans, issues, git) and tells you which skill to run next. Read-only by design: the artifacts are the checkpoint, so there's no separate state file to drift.
+
 ## Why These Skills Exist
 
 I built these skills as a way to fix common failure modes I see with Claude Code, Codex, and other coding agents.
@@ -200,6 +202,7 @@ Skills I use daily for code work.
 - **[to-issues](./skills/engineering/to-issues/SKILL.md)** — Break a feature into independently-grabbable backlog tickets (each = a vertical slice taking hours/days). Reads PRD + `design.md` + `docs/plans/`. Different from `/write-plan`, which produces task-level steps for immediate execution; the two can chain.
 - **[to-prd](./skills/engineering/to-prd/SKILL.md)** — Turn the current conversation context into a **product** PRD (user intent, acceptance criteria, out-of-scope). No technical design — that's `/design-like-senior`.
 - **[write-plan](./skills/engineering/write-plan/SKILL.md)** — Turn a feature design into a behavior-driven TDD plan. Lists behaviors, public interfaces, and anti-patterns to refuse — _not_ pre-written test code. `/tdd` derives the actual test from the behavior at execution time. For backlog tickets, use `/to-issues` instead; the two can chain.
+- **[where-am-i](./skills/engineering/where-am-i/SKILL.md)** — Read-only inspection of workflow artifacts (`architecture.md`, ADRs, `CONTEXT.md`, `design.md`, plans, issues, git) that reports project status and recommends the next skill to run. Use when resuming after a break or unsure what to run next.
 - **[zoom-out](./skills/engineering/zoom-out/SKILL.md)** — Tell the agent to zoom out and give broader context or a higher-level perspective on an unfamiliar section of code.
 
 ### Productivity
