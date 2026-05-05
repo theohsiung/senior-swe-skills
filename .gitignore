@@ -1,0 +1,23 @@
+# Claude Code local config
+.claude/
+.agents/
+
+# Skill installer lock
+skills-lock.json
+
+# Skill eval workspaces (iteration outputs — development artifacts)
+skills/*/*-workspace/
+
+# Skill eval definitions (dev-time iteration tool, not shipped)
+skills/*/*/evals/
+
+# One-shot eval reports (snapshots, not living docs)
+skills/*/SHIPPING-READINESS-BENCHMARK.md
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/

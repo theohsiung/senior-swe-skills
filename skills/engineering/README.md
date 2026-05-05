@@ -8,6 +8,8 @@ Skills I use daily for code work.
 - **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)** — Find deepening opportunities in a codebase, informed by the domain language in `CONTEXT.md` and the decisions in `docs/adr/`.
 - **[setup-matt-pocock-skills](./setup-matt-pocock-skills/SKILL.md)** — Scaffold the per-repo config (issue tracker, triage label vocabulary, domain doc layout) that the other engineering skills consume.
 - **[tdd](./tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
+- **[think-like-senior](./think-like-senior/SKILL.md)** — Senior-style architecture pass for a new project (or major pivot): walks constraints → load-bearing decisions → system architecture → data model → resilience → code style. Run once per project before `/to-prd`.
+- **[design-like-senior](./design-like-senior/SKILL.md)** — Per-feature design pass between PRD and implementation: walks application architecture, module boundaries, and public-interface design. Anchors recommendations to the project's architecture.md and ADRs.
 - **[to-issues](./to-issues/SKILL.md)** — Break any plan, spec, or PRD into independently-grabbable GitHub issues using vertical slices.
 - **[to-prd](./to-prd/SKILL.md)** — Turn the current conversation context into a PRD and submit it as a GitHub issue.
 - **[zoom-out](./zoom-out/SKILL.md)** — Tell the agent to zoom out and give broader context or a higher-level perspective on an unfamiliar section of code.
