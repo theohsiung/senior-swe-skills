@@ -1,6 +1,6 @@
 ---
 name: to-issues
-description: Break a feature into independently-grabbable backlog issues on the project issue tracker using tracer-bullet vertical slices. Reads PRD, design.md, and (if present) docs/plans/ to produce ticket-level issues for human/agent pickup. Use when user wants to convert a plan into backlog tickets, create implementation issues, or break down work for asynchronous pickup. **Different from /write-plan**: to-issues produces ticket-level slices for the backlog (each issue = a vertical slice covering many TDD cycles, sized for hours/days of work); /write-plan produces a behavior list at TDD-cycle granularity for immediate execution. They can chain — run /write-plan first to get the behavior list, then /to-issues to group adjacent behaviors into shippable slices.
+description: "Break a feature into independently-grabbable backlog issues on the project issue tracker using tracer-bullet vertical slices, each declaring its blocking edges. Reads PRD, design.md, and (if present) docs/plans/ to produce ticket-level issues for human/agent pickup. Use when user wants to convert a plan into backlog tickets, create implementation issues, or break down work for asynchronous pickup. Different from /write-plan, which lists TDD cycles for immediate execution; to-issues groups adjacent cycles into hours-to-days vertical slices for the backlog. They chain: /write-plan first, then /to-issues."
 ---
 
 # To Issues
@@ -32,6 +32,8 @@ This skill does NOT write `docs/plans/*` (use `/write-plan` for execution plans)
 
 Read the inputs above. Use the project's domain glossary (`CONTEXT.md`) for vocabulary, and respect ADRs in the area you're touching.
 
+Look for opportunities to **prefactor** the code to make the implementation easier — "make the change easy, then make the easy change." Prefactoring becomes its own slice, first in the graph.
+
 ### 2. Draft slices
 
 Break the feature into **slices** (see [`docs/skill-contracts.md` §2](../../../docs/skill-contracts.md) — slice = hours-to-days, cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer).
@@ -44,8 +46,14 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
 - Prefer many thin slices over few thick ones
-- When a master plan exists, every cycle (`T-NNN`) belongs to exactly one slice — no orphans, no double-counts
+- Each slice is sized to fit in a single fresh context window — an AFK agent picking it up cold must be able to finish it without compaction
+- Any prefactoring is done first
+- When a master plan exists, every cycle (`T-NNN`) belongs to exactly one slice — no orphans, no double-counts. Check this mechanically with `scripts/check-plan.sh docs/plans/<slug>.md --slices "T-001..T-004" "T-005..T-009" ...` before publishing.
 </slice-rules>
+
+Give each slice its **blocking edges**: the other slices that must complete before it can start. A slice with no blockers can start immediately. Implementers work the **frontier** — any slice whose blockers are all done.
+
+**Wide refactors are the exception to vertical slicing.** A wide refactor is one mechanical change (rename a column, retype a shared symbol) whose blast radius fans across the codebase, so no vertical slice can land green. Sequence it as **expand–contract** instead: *expand* (add the new form beside the old so nothing breaks), then *migrate* call sites in batches sized by blast radius (per package / directory, each batch its own slice blocked by the expand, CI green throughout), then *contract* (delete the old form, blocked by every migrate batch). No compatibility shims survive the contract slice.
 
 ### 3. Quiz the user
 
@@ -69,7 +77,10 @@ Iterate until the user approves the breakdown.
 
 For each approved slice, publish a new issue to the issue tracker. Use the issue body template below. Apply the `needs-triage` triage label so each issue enters the normal triage flow.
 
-Publish issues in dependency order (blockers first) so you can reference real issue identifiers in the "Blocked by" field.
+Publish issues in dependency order (blockers first) so you can reference real issue identifiers in the "Blocked by" field. How depends on the tracker in `docs/agents/issue-tracker.md`:
+
+- **Real tracker (GitHub, GitLab, Linear, …)** — one issue per slice. Use the platform's **native blocking relationship** where it has one (and then omit the `## Blocked by` section); otherwise fill it in. If the source was an existing issue, make each slice its **sub-issue** using the tracker doc's operation.
+- **Local files** — one file per slice under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order. Never one combined file.
 
 <issue-template>
 ## Parent
@@ -101,15 +112,19 @@ A concise description of this slice. Describe the end-to-end behavior, not layer
 - [ ] Criterion 2
 - [ ] Criterion 3
 
+Each criterion must be checkable through observable behaviour, at evidence level 4 or 5 (see [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md)) — "the CLI prints X", "the endpoint returns 409", not "the code handles X".
+
 ## Blocked by
 
 - A reference to the blocking ticket (if any)
 
-Or "None - can start immediately" if no blockers.
+Or "None - can start immediately" if no blockers. Omit this section when blockers were set as native edges.
 
 </issue-template>
 
 Do NOT close or modify any parent issue.
+
+Avoid specific code snippets in issue bodies — they go stale fast; the master plan and `design.md` carry the technical detail. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose (state machine, schema, type shape), inline the decision-rich part and note it came from a prototype.
 
 ## Anti-patterns to refuse
 
@@ -134,7 +149,7 @@ Stop and surface the problem instead of producing issues, when:
 
 Tell the user:
 
-> N issues published to <tracker>, each tagged `needs-triage`, linked via "Blocked by", and (when a master plan exists) carrying a `## Plan tasks` reference to the master plan + `T-NNN` range. Next steps:
+> N issues published to <tracker>, each tagged `needs-triage`, linked via blocking edges (native where the tracker supports them), and (when a master plan exists) carrying a `## Plan tasks` reference to the master plan + `T-NNN` range. Next steps:
 >
 > - **When you (or someone else) picks up an issue** — run `/write-plan <issue#>` (it runs in **filter mode** when the issue references a master plan: it reads the master, prints only this slice's cycles, never writes a divergent plan), then `/tdd` to execute.
 > - **To manage the backlog** — use `/triage` for state transitions (`needs-triage` → `ready-for-agent` / `ready-for-human` / `wontfix`).

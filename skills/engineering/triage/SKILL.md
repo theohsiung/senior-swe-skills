@@ -1,6 +1,6 @@
 ---
 name: triage
-description: Triage issues through a state machine driven by triage roles. Use when user wants to create an issue, triage issues, review incoming bugs or feature requests, prepare issues for an AFK agent, or manage issue workflow.
+description: "Triage issues through a state machine driven by triage roles: categorise, check redundancy, verify the claim, grill if needed, and write agent-ready briefs. Use when user wants to create an issue, triage issues, review incoming bugs or feature requests, prepare issues for an AFK agent, or manage issue workflow."
 ---
 
 # Triage
@@ -21,7 +21,7 @@ Every comment or issue posted to the issue tracker during triage **must** start 
 4. **`docs/agents/issue-tracker.md`** — to know which CLI to call (`gh`, `glab`, or local markdown).
 5. **`CONTEXT.md` and `docs/adr/`** (paths from `paths.md`) — for vocabulary and prior decisions when grilling.
 6. **`.out-of-scope/*.md`** (path from `paths.md`) — surface any prior rejection that resembles this issue before treating it as fresh.
-7. **The codebase** — when reproducing bugs (read code, run tests, attempt repro).
+7. **The codebase** — when checking redundancy and verifying the claim (read code, run tests, attempt repro).
 
 ## Outputs
 
@@ -79,11 +79,13 @@ Show counts and a one-line summary per issue. Let the maintainer pick.
 
 ## Triage a specific issue
 
-1. **Gather context.** Read the full issue (body, comments, labels, reporter, dates). Parse any prior triage notes so you don't re-ask resolved questions. Explore the codebase using the project's domain glossary, respecting ADRs in the area. Read `.out-of-scope/*.md` and surface any prior rejection that resembles this issue.
+1. **Gather context.** Read the full issue (body, comments, labels, reporter, dates). Parse any prior triage notes so you don't re-ask resolved questions. Explore the codebase using the project's domain glossary, respecting ADRs in the area. Run two checks:
+   - **Redundancy** — search for an existing implementation of the requested behavior *by domain concept* (not just the request's wording), and report where you looked. If found, it's an already-implemented `wontfix` (step 5).
+   - **Prior rejection** — read `.out-of-scope/*.md` and surface any prior rejection that resembles this issue.
 
-2. **Recommend.** Tell the maintainer your category and state recommendation with reasoning, plus a brief codebase summary relevant to the issue. Wait for direction.
+2. **Recommend.** Tell the maintainer your category and state recommendation with reasoning, plus a brief codebase summary relevant to the issue (including whether it's already implemented). Wait for direction.
 
-3. **Reproduce (bugs only).** Before any grilling, attempt reproduction: read the reporter's steps, trace the relevant code, run tests or commands. Report what happened — successful repro with code path, failed repro, or insufficient detail (a strong `needs-info` signal). A confirmed repro makes a much stronger agent brief.
+3. **Verify the claim.** Before any grilling, check that the claim holds up. For a bug, reproduce it from the reporter's steps (use `docs/agents/verify.md` recipes if present). For an enhancement that claims a current limitation, confirm the limitation exists. Report what happened — confirmed (with code path and evidence level, see [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md)), failed, or insufficient detail (a strong `needs-info` signal). A confirmed verification makes a much stronger agent brief.
 
 4. **Grill (if needed).** If the issue needs fleshing out, run a `/grill-with-docs` session.
 
@@ -91,8 +93,10 @@ Show counts and a one-line summary per issue. Let the maintainer pick.
    - `ready-for-agent` — post an agent brief comment ([AGENT-BRIEF.md](AGENT-BRIEF.md)).
    - `ready-for-human` — same structure as an agent brief, but note why it can't be delegated (judgment calls, external access, design decisions, manual testing).
    - `needs-info` — post triage notes (template below).
-   - `wontfix` (bug) — polite explanation, then close.
-   - `wontfix` (enhancement) — write to `.out-of-scope/`, link to it from a comment, then close ([OUT-OF-SCOPE.md](OUT-OF-SCOPE.md)).
+   - `wontfix` — close the issue, with the comment depending on *why*:
+     - **Already implemented** — point to where it lives. Do **not** write to `.out-of-scope/` (that knowledge base is for *rejected* requests, not built ones).
+     - **Rejected (bug)** — polite explanation, then close.
+     - **Rejected (enhancement)** — write to `.out-of-scope/`, link to it from a comment, then close ([OUT-OF-SCOPE.md](OUT-OF-SCOPE.md)).
    - `needs-triage` — apply the role. Optional comment if there's partial progress.
 
 ## Quick state override

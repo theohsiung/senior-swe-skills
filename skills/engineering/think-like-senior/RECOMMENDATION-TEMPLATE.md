@@ -30,7 +30,7 @@ Every architectural recommendation produced by this skill uses the same five sec
 
 **Driven by** is the most important section. Every bullet must cite a *concrete* Phase A constraint or an earlier accepted decision. If a bullet reads like "best practice" or "industry standard", delete it — that's hallucination dressed as reasoning. Without "Driven by", the recommendation is unfalsifiable.
 
-**Considered & rejected** forces the recommendation through a real comparison. At least one alternative must appear, even if you reject it in one line. This is what stops the LLM from locking onto its first idea. It also gives the user a free menu — sometimes they'll see a rejected option and say "actually that one fits, here's why".
+**Considered & rejected** forces the recommendation through a real comparison. At least one alternative must appear, even if you reject it in one line. When the recommendation introduces a new module or system shape, at least one alternative must be a **whole-shape** alternative (a structurally different decomposition), not a point variation of the chosen shape — and say what complexity it would hide or expose compared to the recommendation. This is what stops the LLM from locking onto its first idea. It also gives the user a free menu — sometimes they'll see a rejected option and say "actually that one fits, here's why".
 
 **What would change my mind** is the user's escape hatch. They don't have to reject the whole recommendation — they can say "constraint X is actually different" and the skill knows what to do. Without this, push-back gets stuck on "I disagree" → "okay, sorry, here's a different recommendation", which is sycophancy.
 

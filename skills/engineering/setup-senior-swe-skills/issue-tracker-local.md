@@ -6,7 +6,7 @@ Issues and PRDs for this repo live as markdown files in `.scratch/`.
 
 - One feature per directory: `.scratch/<feature-slug>/`
 - The PRD is `.scratch/<feature-slug>/PRD.md`
-- Implementation issues are `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`
+- Implementation issues are one file per slice at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order, never a single combined file. Blocking edges are a `Blocked by: NN, NN` line near the top
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 

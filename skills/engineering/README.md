@@ -20,7 +20,8 @@ Skills I use daily for code work, ordered by where they fit in the typical workf
 - **[design-like-senior](./design-like-senior/SKILL.md)** — Per-feature technical design: application architecture, module boundaries, and public-interface signatures. Produces `docs/features/<slug>/design.md`. Anchored to `architecture.md` + ADRs.
 - **[write-plan](./write-plan/SKILL.md)** — Turn a feature design into a behavior-driven TDD master plan with stable `T-NNN` task IDs. **Does not** contain pre-written test code (the bulk-writing anti-pattern). When invoked against an issue, runs in **filter mode** — prints only that slice's cycles from the master plan, never writes a divergent copy.
 - **[to-issues](./to-issues/SKILL.md)** — Group adjacent cycles from the master plan into backlog **slices** (hours/days each). Each issue carries a `## Plan tasks: T-NNN..T-NNN` reference so `/write-plan <issue#>` can filter it later. The master plan stays the single source of truth.
-- **[tdd](./tdd/SKILL.md)** — Execute test-first development cycle by cycle. Reads the master plan (or its filtered slice) and derives the test for each cycle at execution time. Default test level is system-public; see [`docs/skill-contracts.md` §3](../../docs/skill-contracts.md).
+- **[tdd](./tdd/SKILL.md)** — Execute test-first development cycle by cycle. Reads the master plan (or its filtered slice) and derives the test for each cycle at execution time. Default test level is system-public; see [`docs/skill-contracts.md` §3](../../docs/skill-contracts.md). Finishes by proving the feature on the real surface (evidence levels, §8).
+- **[code-review](./code-review/SKILL.md)** — Two-axis review of a branch before merge: **Standards** (repo standards + `architecture.md` code style + design red flags + a Fowler smell baseline) and **Spec** (PRD + `design.md` + the master plan's `T-NNN` cycles), run as parallel sub-agents and reported side by side.
 
 ## Maintenance and navigation
 

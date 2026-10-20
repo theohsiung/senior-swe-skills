@@ -1,5 +1,22 @@
 {
   "name": "senior-swe-skills",
+  "version": "0.2.0",
+  "description": "Senior-engineer workflow skills: domain grilling, project architecture, per-feature design, behavior-driven TDD plans, evidence-gated TDD, two-axis code review, and diagnosis. Built on mattpocock/skills.",
+  "author": {
+    "name": "theohsiung",
+    "url": "https://github.com/theohsiung"
+  },
+  "repository":"https://github.com/theohsiung/senior-swe-skills",
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "skills",
+    "architecture",
+    "design",
+    "tdd",
+    "code-review",
+    "grilling"
+  ],
   "skills": [
     "./skills/engineering/diagnose",
     "./skills/engineering/grill-with-docs",
@@ -12,10 +29,12 @@
     "./skills/engineering/design-like-senior",
     "./skills/engineering/to-issues",
     "./skills/engineering/to-prd",
+    "./skills/engineering/code-review",
     "./skills/engineering/where-am-i",
     "./skills/engineering/zoom-out",
     "./skills/productivity/caveman",
     "./skills/productivity/grill-me",
+    "./skills/productivity/grilling",
     "./skills/productivity/write-a-skill"
   ]
 }

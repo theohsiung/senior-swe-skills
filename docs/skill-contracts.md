@@ -13,16 +13,19 @@ Each artifact has exactly one **writer skill** (the one allowed to create or rew
 | Artifact | Writer | Readers | Append-via |
 |---|---|---|---|
 | `docs/agents/*.md` (paths, issue tracker, triage labels, domain layout) | `setup-senior-swe-skills` | all engineering skills | re-run setup |
+| `docs/agents/verify.md` (Launch / Doctor / Drive / Evidence / Cleanup + feature map) | `setup-senior-swe-skills` | `tdd`, `diagnose`, `triage`, `where-am-i` | edit directly when the boot recipe changes; re-run it once after editing |
 | `docs/architecture.md` | `think-like-senior` | `design-like-senior`, `write-plan`, `tdd`, `improve-codebase-architecture`, `where-am-i`, `to-prd` | re-run `think-like-senior` in update mode |
 | `docs/adr/NNNN-*.md` | **shared ADR protocol** (see §4) | all skills | shared protocol |
 | `CONTEXT.md` (or `CONTEXT-MAP.md` + per-context files) | `grill-with-docs` | all skills | append inline during `grill-with-docs`; other skills propose terms but redirect writes here |
 | `docs/prd/<slug>.md` (or PRD on issue tracker) | `to-prd` | `design-like-senior`, `to-issues`, `where-am-i` | re-run `to-prd` |
-| `docs/features/<slug>/design.md` | `design-like-senior` | `write-plan`, `to-issues`, `tdd`, `where-am-i` | re-run `design-like-senior` (revision mode) |
-| `docs/plans/<slug>.md` (master plan) | `write-plan` | `tdd`, `to-issues`, `where-am-i` | re-run `write-plan` against same slug — append new tasks with new IDs, never renumber |
+| `docs/features/<slug>/design.md` | `design-like-senior` | `write-plan`, `to-issues`, `tdd`, `code-review`, `where-am-i` | re-run `design-like-senior` (revision mode) |
+| `docs/plans/<slug>.md` (master plan) | `write-plan` | `tdd`, `to-issues`, `code-review`, `where-am-i` | re-run `write-plan` against same slug — append new tasks with new IDs, never renumber. Validate with `scripts/check-plan.sh` |
 | `.out-of-scope/<slug>.md` | `triage` | `triage`, `to-prd` | re-run `triage` |
 | Issues on the issue tracker | `to-prd`, `to-issues` (create); `triage` (transition) | all skills | `triage` for state changes |
 
 **Filename normalization:** `<slug>` is always kebab-case derived from the feature title. The plan file does **not** include a date prefix anymore — see §5 (slugs are stable, dates are not). If you find a legacy `YYYY-MM-DD-<slug>.md` plan, treat it as the master plan for that slug.
+
+Plan structure is enforced mechanically by [`scripts/check-plan.sh`](../scripts/check-plan.sh) — the same "encode the rule in a script, not in prose" approach as `next-adr-number.sh`. `--slices` additionally checks that a set of issue ranges covers every live task exactly once.
 
 **Path resolution:** the literal paths above are defaults. The actual paths come from `docs/agents/paths.md` (written by `setup-senior-swe-skills`). Skills must read `paths.md` first and fall back to the defaults only if it's missing. See §6.
 
@@ -160,3 +163,25 @@ Skills must not hardcode the literal strings above when generating cross-referen
 Claude Code reads `CLAUDE.md`. Codex / Aider / many open-source agents read `AGENTS.md`. When both tools are likely to use the repo, `setup-senior-swe-skills` writes the `## Agent skills` block into **both** files (or symlinks one to the other if the user prefers). Writing to only one would leave the other harness blind to the setup, so the older "edit whichever exists, never create the other" rule has been retired.
 
 If only one tool is in use, only that file is touched.
+
+---
+
+## §8 — Evidence levels
+
+"It works" means different things depending on how you know. Every skill that reports a result — `tdd` Finishing, `diagnose` Phase 6, `triage` Verify the claim, `to-issues` acceptance criteria, `where-am-i` status — states which level it reached. The levels are ordered; a claim is only as strong as the highest level actually *performed*, not the one intended.
+
+| Level | Evidence | Example |
+|---|---|---|
+| 1 | **Asserted** — someone said so | "the fix is in", a ticked checkbox, a commit message |
+| 2 | **Pointed** — cited the line of code that should make it true | "`retry()` wraps the call at `client.ts:42`" |
+| 3 | **Reasoned** — showed the failing case can't happen (types, invariant, exhaustive match) | "`Status` is a closed union and the switch is exhaustive" |
+| 4 | **Ran** — a test or script exercised it and passed | `npm test -- booking` green; the diagnose loop went red → green |
+| 5 | **Reproduced on the real surface** — drove the running system through its system-public entry point (§3) and observed the outcome | `curl -X POST /bookings …` → `201`, then `GET` shows `confirmed` |
+
+Rules:
+
+1. **Report the level with the claim.** "Done (level 4: suite green; level 5 not reached — no dev DB)" beats "Done".
+2. **Inconclusive is not a pass.** A run that errored for an unrelated reason, hit the wrong surface, or was skipped is reported as *not verified*, never rounded up.
+3. **Prefer the real artifact over a proxy.** "It compiles", a mock-only test, or the author's own summary are proxies. Level 5 uses the recipe in `docs/agents/verify.md`.
+4. **Label non-verified statements** in reports and briefs as *measured*, *inferred*, or *guess*, so a reader knows which sentences carry evidence.
+5. **Independent check where it matters.** A reviewer that didn't write the code (`/code-review`, or a fresh sub-agent running the level-5 drive) catches what the author meant-but-didn't-build. Use one before merging non-trivial work.
