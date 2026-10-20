@@ -74,8 +74,10 @@ Escape hatches:
 
 Two rules are enforced by more than prose:
 
-- **Plans are checked mechanically.** `scripts/check-plan.sh docs/plans/<slug>.md [--slices ...]` validates the plan contract (header, stable increasing `T-NNN` IDs, the six sub-blocks per cycle, a valid public-interface level, no test code in the plan, every cycle in exactly one slice).
-- **"Done" carries an evidence level.** [`docs/skill-contracts.md` §8](./docs/skill-contracts.md) defines five levels from *asserted* to *reproduced on the real surface*; `/tdd`, `/diagnose` and `/triage` report which they reached, using the boot/drive recipe that `/setup-senior-swe-skills` writes to `docs/agents/verify.md`.
+- **Plans are checked mechanically.** [`write-plan/scripts/check-plan.sh`](./skills/engineering/write-plan/scripts/check-plan.sh) validates a master plan against the task contract in [`docs/skill-contracts.md` §5](./docs/skill-contracts.md), and with `--slices` checks that the issues cover every cycle exactly once.
+- **"Done" carries an evidence level.** [`docs/skill-contracts.md` §8](./docs/skill-contracts.md) defines five levels from *asserted* to *reproduced on the real surface*, using the boot/drive recipe that `/setup-senior-swe-skills` writes to `docs/agents/verify.md`.
+
+`grill-me` and `grill-with-docs` delegate their questioning to `grilling` — install it alongside them.
 
 Note: `/write-plan` produces a **behavior list**, not pre-written test code. `/tdd` derives the actual test for each cycle at execution time, looking at the just-passed code. This is the "don't outrun your headlights" discipline — pre-writing tests in bulk is an anti-pattern.
 
@@ -212,7 +214,7 @@ General workflow tools, not code-specific.
 
 - **[caveman](./skills/productivity/caveman/SKILL.md)** — Ultra-compressed communication mode. Cuts token usage ~75% by dropping filler while keeping full technical accuracy.
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — Get relentlessly interviewed about a plan or design until every branch of the decision tree is resolved.
-- **[grilling](./skills/productivity/grilling/SKILL.md)** — The shared questioning mechanics behind `grill-me`, `grill-with-docs` and `triage`: rounds over the decision frontier, each question with a recommended answer.
+- **[grilling](./skills/productivity/grilling/SKILL.md)** — The shared questioning mechanics behind `grill-me` and `grill-with-docs`: rounds over the decision frontier, each question with a recommended answer. Required by both.
 - **[write-a-skill](./skills/productivity/write-a-skill/SKILL.md)** — Create new skills with proper structure, progressive disclosure, and bundled resources.
 
 ### Misc

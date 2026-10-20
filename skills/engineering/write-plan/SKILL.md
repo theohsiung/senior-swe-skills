@@ -127,13 +127,13 @@ T-002 <Behavior>
 
 For each title, ask "is this user-visible? Is this stated as WHAT not HOW?" Walk the list once with the user, fixing any title that smells like implementation. Then expand into the full plan and save.
 
-**Then run the mechanical check** and fix every line it prints before telling the user the plan is ready:
+**Then run the mechanical check** bundled in this skill's folder, from the project root, and fix every line it prints before telling the user the plan is ready:
 
 ```bash
-scripts/check-plan.sh docs/plans/<slug>.md
+<this skill dir>/scripts/check-plan.sh docs/plans/<slug>.md
 ```
 
-It enforces the plan contract from [`docs/skill-contracts.md` §5](../../../docs/skill-contracts.md): header fields, unique/increasing `T-NNN` IDs, the exact withdrawn-task form, all six sub-blocks per task, a valid `Level:`, and no test code smuggled into the plan. Prose rules drift; the script doesn't.
+It enforces the task contract in [`docs/skill-contracts.md` §5](../../../docs/skill-contracts.md). Prose rules drift; the script doesn't.
 
 ## Filter mode
 

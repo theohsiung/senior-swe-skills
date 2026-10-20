@@ -64,7 +64,7 @@ After each batch, stop and report:
 - Callers have to know the module's internal rules to use the public interface correctly.
 - Two cycles deviate from `design.md` in the same direction.
 
-Recommend `/design-like-senior` in revision mode with the concrete evidence (cycle IDs, the repeated workaround). Don't paper over it in the refactor step.
+Route it the same way as the seam case above, with the concrete evidence (cycle IDs, the repeated workaround): `/improve-codebase-architecture` once the interface exists in code (the usual mid-feature case), `/design-like-senior` in revision mode only while it's still on paper. Don't paper over it in the refactor step.
 
 Don't guess through blockers — ask.
 
@@ -117,7 +117,7 @@ After all tests pass (plan mode: between batches; self-directed: after the loop)
 When all tasks/behaviors are complete:
 
 1. Run the full test suite
-2. **Prove it on the real surface.** A green suite is evidence level 4 at best (see [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md)). Drive the feature once through its system-public entry point — the real CLI command, a `curl` against the running server, the UI flow — using the recipes in `docs/agents/verify.md` if it exists. Paste the command and its (redacted) output. If you can't reach the real surface, say so and report the result as **not verified**, not as done. "Inconclusive" is not a pass.
+2. **Prove it on the real surface.** A green suite is evidence level 4 at best (see [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md)). Drive the feature once through its system-public entry point — the real CLI command, a `curl` against the running server, the UI flow — using the recipes in `docs/agents/verify.md` if it exists. Paste the command and its (redacted) output. If you can't reach the real surface, report the result as not verified (§8 rule 2), not as done.
 3. Report pass/fail, coverage, and the evidence level you reached
 4. Ask the user before committing anything not already committed
 
@@ -125,7 +125,7 @@ After commit, suggest the next step based on what happened during the cycle:
 
 - **A test was hard to write because the seam was wrong** → recommend `/improve-codebase-architecture` against the affected module before the next feature.
 - **A test surfaced a regression elsewhere** → recommend `/diagnose` for the regression, separate from this feature's commits.
-- **Before merging / opening a PR** → recommend `/code-review` against the branch's base. A reviewer that didn't write the code catches what the author meant-but-didn't-build; it checks both coding standards and the spec (PRD + `design.md` + plan).
+- **Before merging / opening a PR** → recommend `/code-review` against the branch's base — the independent check from §8 rule 5, against both coding standards and the spec (PRD + `design.md` + plan).
 - **The behavior list completed cleanly** → next feature or ticket. Loop back to `/to-prd` (new feature) or pick the next issue from `/triage`'s `ready-for-agent` queue.
 
 ---

@@ -13,19 +13,19 @@ Each artifact has exactly one **writer skill** (the one allowed to create or rew
 | Artifact | Writer | Readers | Append-via |
 |---|---|---|---|
 | `docs/agents/*.md` (paths, issue tracker, triage labels, domain layout) | `setup-senior-swe-skills` | all engineering skills | re-run setup |
-| `docs/agents/verify.md` (Launch / Doctor / Drive / Evidence / Cleanup + feature map) | `setup-senior-swe-skills` | `tdd`, `diagnose`, `triage`, `where-am-i` | edit directly when the boot recipe changes; re-run it once after editing |
+| `docs/agents/verify.md` (Launch / Doctor / Drive / Evidence / Cleanup + feature map) | `setup-senior-swe-skills` | `tdd`, `diagnose`, `triage`, `where-am-i` | re-run setup (Section E) when the boot recipe changes; it re-proves the recipe end to end |
 | `docs/architecture.md` | `think-like-senior` | `design-like-senior`, `write-plan`, `tdd`, `improve-codebase-architecture`, `where-am-i`, `to-prd` | re-run `think-like-senior` in update mode |
 | `docs/adr/NNNN-*.md` | **shared ADR protocol** (see §4) | all skills | shared protocol |
 | `CONTEXT.md` (or `CONTEXT-MAP.md` + per-context files) | `grill-with-docs` | all skills | append inline during `grill-with-docs`; other skills propose terms but redirect writes here |
-| `docs/prd/<slug>.md` (or PRD on issue tracker) | `to-prd` | `design-like-senior`, `to-issues`, `where-am-i` | re-run `to-prd` |
+| `docs/prd/<slug>.md` (or PRD on issue tracker) | `to-prd` | `design-like-senior`, `to-issues`, `code-review`, `where-am-i` | re-run `to-prd` |
 | `docs/features/<slug>/design.md` | `design-like-senior` | `write-plan`, `to-issues`, `tdd`, `code-review`, `where-am-i` | re-run `design-like-senior` (revision mode) |
-| `docs/plans/<slug>.md` (master plan) | `write-plan` | `tdd`, `to-issues`, `code-review`, `where-am-i` | re-run `write-plan` against same slug — append new tasks with new IDs, never renumber. Validate with `scripts/check-plan.sh` |
+| `docs/plans/<slug>.md` (master plan) | `write-plan` | `tdd`, `to-issues`, `code-review`, `where-am-i` | re-run `write-plan` against same slug — append new tasks with new IDs, never renumber. Validate with `write-plan/scripts/check-plan.sh` |
 | `.out-of-scope/<slug>.md` | `triage` | `triage`, `to-prd` | re-run `triage` |
 | Issues on the issue tracker | `to-prd`, `to-issues` (create); `triage` (transition) | all skills | `triage` for state changes |
 
 **Filename normalization:** `<slug>` is always kebab-case derived from the feature title. The plan file does **not** include a date prefix anymore — see §5 (slugs are stable, dates are not). If you find a legacy `YYYY-MM-DD-<slug>.md` plan, treat it as the master plan for that slug.
 
-Plan structure is enforced mechanically by [`scripts/check-plan.sh`](../scripts/check-plan.sh) — the same "encode the rule in a script, not in prose" approach as `next-adr-number.sh`. `--slices` additionally checks that a set of issue ranges covers every live task exactly once.
+Plan structure is enforced mechanically by [`write-plan/scripts/check-plan.sh`](../skills/engineering/write-plan/scripts/check-plan.sh) against the contract in §5 — the same "encode the rule in a script, not in prose" approach as `next-adr-number.sh`. Scripts live inside the skill folder that owns them, so they ship with the skill into consumer repos.
 
 **Path resolution:** the literal paths above are defaults. The actual paths come from `docs/agents/paths.md` (written by `setup-senior-swe-skills`). Skills must read `paths.md` first and fall back to the defaults only if it's missing. See §6.
 
@@ -75,7 +75,7 @@ The format itself lives in [`skills/engineering/grill-with-docs/ADR-FORMAT.md`](
 
 ### Allocating the next number
 
-Use [`scripts/next-adr-number.sh`](../scripts/next-adr-number.sh). It scans `docs/adr/`, picks `max(NNNN) + 1`, and uses an `mkdir`-based lock so two parallel sessions can't claim the same number. Skills shell out to this script — they don't implement their own scan.
+Use [`grill-with-docs/scripts/next-adr-number.sh`](../skills/engineering/grill-with-docs/scripts/next-adr-number.sh). It scans `docs/adr/`, picks `max(NNNN) + 1`, and uses an `mkdir`-based lock so two parallel sessions can't claim the same number. Skills shell out to this script — they don't implement their own scan.
 
 ### Writing the file
 
@@ -118,6 +118,12 @@ Plan file shape:
 
 ### T-002: ...
 ```
+
+### Task contract
+
+Every live task heading reads `### T-NNN: <behavior>`; a withdrawn one reads exactly `### ~~T-NNN~~ Withdrawn`. The header carries `**Goal:**`, `**Design doc:**` and `**Task IDs:**`. Each live task carries six sub-blocks, in the shape shown in `write-plan`'s task template: **Behavior to verify**, **Public interface this task introduces** (with a `- Level:` line naming exactly one of system-public / module-public, see §3), **Files**, **Test framing hints**, **Anti-patterns to refuse**, **Definition of done**. No fenced block inside a task contains test code — `/tdd` writes the test at execution time.
+
+This is what `write-plan/scripts/check-plan.sh` checks. With `--slices`, it also checks that a set of issue ranges covers every live task exactly once.
 
 ### Slice references
 

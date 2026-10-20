@@ -34,10 +34,10 @@ All ADR-writing skills follow these four steps. None of them allocate numbers or
 
 ### Step 1 — Allocate the number
 
-Run the helper script (it acquires a lock so parallel sessions can't collide):
+Run the helper script bundled in the `grill-with-docs` skill folder (it acquires a lock so parallel sessions can't collide). Run it from the project root, with the path resolved against that skill folder — from another skill's folder that's `../grill-with-docs/scripts/next-adr-number.sh`:
 
 ```bash
-scripts/next-adr-number.sh "${ADR_ROOT:-docs/adr}"
+<grill-with-docs skill dir>/scripts/next-adr-number.sh "${ADR_ROOT:-docs/adr}"
 ```
 
 It prints the next zero-padded number, e.g. `0007`, and creates the directory if it doesn't exist. Don't roll your own `find max` — it's a race.

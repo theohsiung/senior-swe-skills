@@ -1,6 +1,6 @@
 ---
 name: to-issues
-description: "Break a feature into independently-grabbable backlog issues on the project issue tracker using tracer-bullet vertical slices, each declaring its blocking edges. Reads PRD, design.md, and (if present) docs/plans/ to produce ticket-level issues for human/agent pickup. Use when user wants to convert a plan into backlog tickets, create implementation issues, or break down work for asynchronous pickup. Different from /write-plan, which lists TDD cycles for immediate execution; to-issues groups adjacent cycles into hours-to-days vertical slices for the backlog. They chain: /write-plan first, then /to-issues."
+description: "Break a feature into independently-grabbable backlog issues on the project issue tracker using tracer-bullet vertical slices, each declaring its blocking edges. Reads PRD, design.md, and (if present) docs/plans/ to produce ticket-level issues for human/agent pickup. Use when user wants to convert a plan into backlog issues, create implementation issues, or break down work for asynchronous pickup. Different from /write-plan, which lists TDD cycles for immediate execution; to-issues groups adjacent cycles into hours-to-days vertical slices for the backlog. They chain: /write-plan first, then /to-issues."
 ---
 
 # To Issues
@@ -48,7 +48,7 @@ Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an
 - Prefer many thin slices over few thick ones
 - Each slice is sized to fit in a single fresh context window — an AFK agent picking it up cold must be able to finish it without compaction
 - Any prefactoring is done first
-- When a master plan exists, every cycle (`T-NNN`) belongs to exactly one slice — no orphans, no double-counts. Check this mechanically with `scripts/check-plan.sh docs/plans/<slug>.md --slices "T-001..T-004" "T-005..T-009" ...` before publishing.
+- When a master plan exists, every cycle (`T-NNN`) belongs to exactly one slice — no orphans, no double-counts. Check this mechanically before publishing, with the script bundled in the `write-plan` skill folder: `../write-plan/scripts/check-plan.sh docs/plans/<slug>.md --slices "T-001..T-004" "T-005..T-009" ...` (path relative to this skill's folder; run from the project root).
 </slice-rules>
 
 Give each slice its **blocking edges**: the other slices that must complete before it can start. A slice with no blockers can start immediately. Implementers work the **frontier** — any slice whose blockers are all done.

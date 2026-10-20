@@ -5,7 +5,7 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-CHECK="$HERE/../../check-plan.sh"
+CHECK="$HERE/../../../skills/engineering/write-plan/scripts/check-plan.sh"
 FAILS=0
 
 expect() {
@@ -43,7 +43,12 @@ expect "orphan task"                     1 "T-003 is not covered by any slice" "
 expect "double-counted task"             1 "T-001 is covered by 2 slices"     "$GOOD" --slices "T-001" "T-001, T-003"
 expect "slice names unknown id"          1 "slice references T-009, which is not a live task" "$GOOD" --slices "T-001, T-003, T-009"
 expect "slice names withdrawn id"        1 "slice references T-002, which is not a live task" "$GOOD" --slices "T-001..T-003" "T-002"
-expect "missing file"                    2 "no such file"                     "$HERE/nope.md"
+expect "subheadings and prose assertions" 0 "OK"                             "$HERE/edge.md"
+expect "indented fence test code"        1 "T-001 contains a fenced block that looks like test code" "$HERE/fences.md"
+expect "tilde fence test code"           1 "T-002 contains a fenced block that looks like test code" "$HERE/fences.md"
+expect "backwards range"                 1 "range runs backwards"             "$GOOD" --slices "T-003..T-001"
+expect "slice problems name the slices"  1 "$GOOD: slices: slice 1"           "$GOOD" --slices "T-009"
+expect "missing file"                  2 "no such file"                     "$HERE/nope.md"
 expect "no args"                         2 "Usage"
 
 if [ "$FAILS" -gt 0 ]; then

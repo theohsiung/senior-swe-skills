@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Check a master plan against the plan contract in docs/skill-contracts.md §5.
+# Check a master plan against the plan contract in docs/skill-contracts.md §5
+# (header fields, stable increasing T-NNN IDs, withdrawn form, the six task
+# sub-blocks with a valid Level, no test code in the plan).
 #
-# Usage:
+# Usage (path is relative to the write-plan skill folder):
 #   scripts/check-plan.sh <plan.md> [--slices <slice> [<slice> ...]]
 #
 # A <slice> is one issue's "covers" list: "T-004..T-008", "T-004, T-006", or
@@ -41,6 +43,11 @@ fi
 awk -v file="$PLAN" -v slices="$SLICES" -v have_slices="$HAVE_SLICES" '
 function problem(line, msg) {
   printf "%s:%d: %s\n", file, line, msg
+  problems++
+}
+
+function slice_problem(msg) {
+  printf "%s: slices: %s\n", file, msg
   problems++
 }
 
@@ -92,21 +99,23 @@ BEGIN {
   last_num = 0
 }
 
-/^```/ {
+/^[ \t]*(```|~~~)/ {
   in_fence = !in_fence
   fence_flagged = 0
   next
 }
 
 in_fence {
-  if (cur != "" && !fence_flagged && ($0 ~ /(^|[^A-Za-z_])(it|test|describe|expect)\(/ || $0 ~ /def test_|@Test|func Test|assert/)) {
+  if (cur != "" && !fence_flagged && ($0 ~ /(^|[^A-Za-z_])(it|test|describe|expect)\(/ || $0 ~ /def test_|@Test|func Test|(^|[^A-Za-z_.])assert($|[ (.A-Z_])/)) {
     problem(NR, cur " contains a fenced block that looks like test code; plans describe behavior, /tdd writes the test")
     fence_flagged = 1
   }
   next
 }
 
-/^### / {
+# Only task headings delimit tasks; any other "### " heading (in the header
+# or inside a task) is ordinary content.
+/^### (~~)?T-/ {
   if (in_header) {
     in_header = 0
     if (!has_goal) problem(1, "header missing **Goal:**")
@@ -122,6 +131,10 @@ in_fence {
     register(id, NR, 0)
   } else if (heading ~ /^~~/) {
     problem(NR, "withdrawn task must read \"### ~~T-NNN~~ Withdrawn\"")
+    id = heading
+    sub(/^~~/, "", id)
+    sub(/[^-0-9T].*/, "", id)
+    if (id ~ /^T-[0-9]+$/) register(id, NR, 0)
   } else if (heading ~ /^T-[0-9][0-9][0-9]+:/) {
     id = heading
     sub(/:.*/, "", id)
@@ -178,16 +191,20 @@ END {
         if (item ~ /^T-[0-9]+\.\.T-[0-9]+$/) {
           lo = item; sub(/\.\..*/, "", lo)
           hi = item; sub(/.*\.\./, "", hi)
-          if (!(lo in live_ids)) problem(0, label ": slice references " lo ", which is not a live task")
-          if (!(hi in live_ids)) problem(0, label ": slice references " hi ", which is not a live task")
+          if (idnum(lo) > idnum(hi)) {
+            slice_problem(label ": range runs backwards (" item "); write it low..high")
+            continue
+          }
+          if (!(lo in live_ids)) slice_problem(label ": slice references " lo ", which is not a live task")
+          if (!(hi in live_ids)) slice_problem(label ": slice references " hi ", which is not a live task")
           for (n = idnum(lo); n <= idnum(hi); n++) {
             if (fmt(n) in live_ids) in_this[fmt(n)] = 1
           }
         } else if (item ~ /^T-[0-9]+$/) {
           if (item in live_ids) in_this[item] = 1
-          else problem(0, label ": slice references " item ", which is not a live task")
+          else slice_problem(label ": slice references " item ", which is not a live task")
         } else {
-          problem(0, label ": cannot parse \"" item "\" (use T-NNN or T-NNN..T-NNN)")
+          slice_problem(label ": cannot parse \"" item "\" (use T-NNN or T-NNN..T-NNN)")
         }
       }
       for (id in in_this) covered[id]++

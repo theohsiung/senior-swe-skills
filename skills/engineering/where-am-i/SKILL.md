@@ -72,10 +72,10 @@ Surface these as caveats — never silently assume the artifact is current:
 - `design.md` references a module path that no longer exists.
 - `CONTEXT.md` term doesn't appear in any source file.
 - Plan has behaviors that look implemented (test exists) but the plan itself wasn't ticked.
-- `scripts/check-plan.sh docs/plans/<slug>.md` prints violations (malformed IDs, missing sub-blocks, test code in the plan). Running it is read-only.
+- `../write-plan/scripts/check-plan.sh docs/plans/<slug>.md` (path relative to this skill's folder) prints violations of the plan contract. It only reads the plan.
 - `docs/agents/verify.md` is missing or still marked DRAFT → `/tdd` and `/diagnose` can't reach evidence level 5; suggest finishing it via `/setup-senior-swe-skills`.
 
-**Verify inherited claims once.** When a cycle *looks* done (test file exists, commit message says so), run that test once before reporting it as done. Don't redo the work — just confirm the claim on the real artifact. Report unrun claims as "looks covered (unverified)".
+**Verify inherited claims once.** When a cycle *looks* done (test file exists, commit message says so), run that test once before reporting it as done — running tests doesn't modify any artifact, so it stays within this skill's read-only rule. Don't redo the work; just confirm the claim. Report unrun claims as "looks covered (evidence level 1–2, unverified)" per [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md).
 
 For stale architecture, recommend `/think-like-senior` in **update mode** (it auto-detects existing `architecture.md` and only discusses gaps).
 

@@ -40,7 +40,7 @@ More than one module writes the same state, or keeps its own copy. An agent edit
 
 ### Two ways to do one task
 
-The design supports more than one way to do the same thing (two clients, two date helpers, sync and async variants of the same call). An agent copies whichever it finds first, so every way keeps gaining callers. **Fix:** keep one way; migrate callers and delete the others in the same change — no compatibility shim left behind.
+The design supports more than one way to do the same thing (two clients, two date helpers, sync and async variants of the same call). An agent copies whichever it finds first, so every way keeps gaining callers. **Fix:** keep one way; migrate callers and delete the others in the same change — no compatibility shim left behind. The one sanctioned exception is a wide refactor too big for one change: run it as expand–contract (see `/to-issues`), where the two forms coexist only until the contract slice deletes the old one.
 
 ### Importable internals
 

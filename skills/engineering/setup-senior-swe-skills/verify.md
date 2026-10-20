@@ -1,6 +1,6 @@
 # Verification recipe
 
-How an agent proves a change works on the **real running system**, not just in the test suite. Read by `/tdd` (Finishing), `/diagnose` (Phase 1), and `/triage` (Verify the claim). Evidence levels are defined in `docs/skill-contracts.md` §8 — driving the system through this recipe is what gets a claim to level 5.
+How an agent proves a change works on the **real running system**, not just in the test suite. Readers are listed in `docs/skill-contracts.md` §1 (`/tdd` Finishing, `/diagnose` Phase 1, `/triage` Verify the claim, `/where-am-i`). Evidence levels are defined in `docs/skill-contracts.md` §8 — driving the system through this recipe is what gets a claim to level 5.
 
 > Status: verified end-to-end on <YYYY-MM-DD> | DRAFT — steps marked `(unverified)` were never run
 
