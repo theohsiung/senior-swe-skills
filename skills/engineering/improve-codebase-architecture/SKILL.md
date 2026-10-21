@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: Find deepening opportunities in EXISTING code, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable. **Different from /design-like-senior**: this skill operates on code that already exists (refactor); /design-like-senior shapes a new feature's modules before any code is written (forward design). Run periodically as the codebase grows.
+description: "Find deepening opportunities in EXISTING code, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable. **Different from /design-like-senior**: this skill operates on code that already exists (refactor); /design-like-senior shapes a new feature's modules before any code is written (forward design). Run periodically as the codebase grows."
 ---
 
 # Improve Codebase Architecture
@@ -60,6 +60,10 @@ Then use the Agent tool with `subagent_type=Explore` to walk the codebase. Don't
 
 Apply the **deletion test** to anything you suspect is shallow: would deleting it concentrate complexity, or just move it? A "yes, concentrates" is the signal you want.
 
+Also use [`../design-like-senior/DESIGN-RED-FLAGS.md`](../design-like-senior/DESIGN-RED-FLAGS.md) as an exploration lens — especially the agent-amplified flags (split ownership, two ways to do one task, importable internals, hand-synced lists), which accumulate fastest in agent-written code.
+
+**Scope by evidence (YAGNI).** Prefer hot spots: areas with high churn in `git log --since=3.months --name-only` or repeated bug fixes. A shallow module nobody touches isn't costing anything yet.
+
 ### 2. Present candidates
 
 Present a numbered list of deepening opportunities. For each candidate:
@@ -98,3 +102,10 @@ Once the user accepts a deepening recommendation, tell them:
 > - **Tests only exist at module-public** — first **lift** the safety net up: write characterization tests at the system-public level (run `/tdd` self-directed to author them), confirm green, *then* perform the deepening. The module-public tests will break during the deepening; that's expected and correct.
 > - **Behavior is genuinely untested** — write characterization tests at the system-public level first (run `/tdd`), then deepen.
 > - **Refactor is project-level (system shape change)** — stop and re-run `/think-like-senior` in update mode; this is bigger than a deepening pass.
+>
+> While executing the refactor:
+>
+> - **Subtract before you add.** First a commit that deletes dead paths and pass-throughs, then the reshape, then cleanup. Each commit green.
+> - **Migrate every caller and delete the old interface in the same wave.** No compatibility shims or re-exports left "for now" — they become the second way to do one task. For a change too wide to land at once, use expand–contract (see `/to-issues`).
+> - **Spot-check every rename against the files.** Renames silently miss usages in strings, config, docs, and dynamic imports — grep for the old name after.
+> - **Keep/revert test.** When done, ask: did locality or leverage actually improve somewhere a reader will feel it? If the diff only moved code around, revert it.

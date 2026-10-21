@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Allocate the next ADR number atomically.
 #
-# Usage:
+# Usage (path is relative to the grill-with-docs skill folder):
 #   scripts/next-adr-number.sh [adr_root]
 #
 # Default adr_root is docs/adr/ relative to the current working directory.

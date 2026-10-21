@@ -17,6 +17,12 @@ If you want to keep up with changes to these skills, and any new ones I create, 
 npx skills@latest add theohsiung/senior-swe-skills
 ```
 
+   Or, in Claude Code, install it as a plugin:
+
+```
+/plugin install senior-swe-skills --marketplace theohsiung/senior-swe-skills
+```
+
 2. Pick the skills you want, and which coding agents you want to install them on. **Make sure you select `/setup-senior-swe-skills`**.
 
 3. Run `/setup-senior-swe-skills` in your agent. It will:
@@ -52,7 +58,10 @@ PER FEATURE
   (per issue, when picked up)
   /write-plan <issue#>            → filter mode: prints only that slice's cycles
         ↓
-  /tdd                            → executes cycles RED→GREEN, derives tests at execution time
+  /tdd                            → executes cycles RED→GREEN, derives tests at execution time,
+                                    finishes with a check on the real running surface
+        ↓
+  /code-review <base>             → Standards + Spec review in parallel sub-agents
 ```
 
 The recommended path is the full chain: **plan first, then issues**. Each issue references its `T-NNN` range from the single master plan, so when an implementer picks it up later, `/write-plan <issue#>` runs in **filter mode** — it prints the relevant cycles without writing a divergent plan. This avoids the drift you'd get from each issue spawning its own copy.
@@ -62,6 +71,13 @@ Escape hatches:
 - **`/write-plan` only** — solo dev, executing now, no backlog needed. Plan → /tdd, done.
 - **`/to-issues` only** — dropping straight from PRD/design.md to backlog without authoring the master plan first. The first implementer to pick up an issue authors the plan, then back-fills the `## Plan tasks` section. Use sparingly — the team-wide view of cycles only emerges when someone authors them.
 - **Tiny / local change** — skip plan and issues; go straight from `/design-like-senior` (or directly from `/to-prd` for very small changes) to `/tdd` self-directed.
+
+Two rules are enforced by more than prose:
+
+- **Plans are checked mechanically.** [`write-plan/scripts/check-plan.sh`](./skills/engineering/write-plan/scripts/check-plan.sh) validates a master plan against the task contract in [`docs/skill-contracts.md` §5](./docs/skill-contracts.md), and with `--slices` checks that the issues cover every cycle exactly once.
+- **"Done" carries an evidence level.** [`docs/skill-contracts.md` §8](./docs/skill-contracts.md) defines five levels from *asserted* to *reproduced on the real surface*, using the boot/drive recipe that `/setup-senior-swe-skills` writes to `docs/agents/verify.md`.
+
+`grill-me` and `grill-with-docs` delegate their questioning to `grilling` — install it alongside them.
 
 Note: `/write-plan` produces a **behavior list**, not pre-written test code. `/tdd` derives the actual test for each cycle at execution time, looking at the just-passed code. This is the "don't outrun your headlights" discipline — pre-writing tests in bulk is an anti-pattern.
 
@@ -181,6 +197,7 @@ Skills I use daily for code work.
 - **[grill-with-docs](./skills/engineering/grill-with-docs/SKILL.md)** — Domain-first grilling session that sharpens terminology and updates `CONTEXT.md` / ADRs inline. Focus is business language, not technical module design (that's `/design-like-senior`).
 - **[triage](./skills/engineering/triage/SKILL.md)** — Triage issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./skills/engineering/improve-codebase-architecture/SKILL.md)** — Find deepening opportunities in **existing** code (refactor). For shaping a new feature's modules before any code is written, use `/design-like-senior` instead.
+- **[code-review](./skills/engineering/code-review/SKILL.md)** — Two-axis review of the changes since a fixed point: **Standards** (repo standards, `architecture.md` code style, design red flags, a Fowler smell baseline) and **Spec** (PRD + `design.md` + master-plan cycles). Parallel sub-agents, reported side by side. Run after `/tdd`, before merge.
 - **[setup-senior-swe-skills](./skills/engineering/setup-senior-swe-skills/SKILL.md)** — Scaffold the per-repo config (project doc paths, issue tracker, triage label vocabulary, domain doc layout) that all other engineering skills consume. Run once per repo before using any of them.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Execute a TDD implementation: read the master plan from `/write-plan` (or its filtered slice) and run cycle-by-cycle with red-green-refactor, or self-direct if no plan exists. Default test level is system-public.
 - **[think-like-senior](./skills/engineering/think-like-senior/SKILL.md)** — Senior-style architecture pass for a new project (or major architectural pivot). Walks constraints → load-bearing decisions → system architecture → data model → resilience → code style, producing `docs/architecture.md` and ADRs. Run once per project before `/to-prd`.
@@ -197,6 +214,7 @@ General workflow tools, not code-specific.
 
 - **[caveman](./skills/productivity/caveman/SKILL.md)** — Ultra-compressed communication mode. Cuts token usage ~75% by dropping filler while keeping full technical accuracy.
 - **[grill-me](./skills/productivity/grill-me/SKILL.md)** — Get relentlessly interviewed about a plan or design until every branch of the decision tree is resolved.
+- **[grilling](./skills/productivity/grilling/SKILL.md)** — The shared questioning mechanics behind `grill-me` and `grill-with-docs`: rounds over the decision frontier, each question with a recommended answer. Required by both.
 - **[write-a-skill](./skills/productivity/write-a-skill/SKILL.md)** — Create new skills with proper structure, progressive disclosure, and bundled resources.
 
 ### Misc

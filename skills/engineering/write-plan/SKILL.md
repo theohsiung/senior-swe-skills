@@ -1,6 +1,6 @@
 ---
 name: write-plan
-description: Turn a feature design into a behavior-driven TDD plan that /tdd executes one cycle at a time. Run after /design-like-senior, before /tdd. Produces docs/plans/<feature-slug>.md — a master plan listing cycles to test (with stable T-NNN IDs), public interfaces to introduce, and anti-patterns to refuse. Does NOT contain pre-written test code (that's the bulk-writing anti-pattern /tdd refuses). When invoked against an issue (e.g. "write a plan for #42"), runs in **filter mode** — reads the master plan and prints only the cycles the issue references; never regenerates a divergent plan. Different from /to-issues which groups adjacent cycles into hours-to-days vertical slices for the backlog. The two chain: /write-plan first to expose the cycle list, then /to-issues to group them into shippable slices.
+description: "Turn a feature design into a behavior-driven TDD plan that /tdd executes one cycle at a time. Run after /design-like-senior, before /tdd. Produces docs/plans/<feature-slug>.md — a master plan listing cycles to test (with stable T-NNN IDs), public interfaces to introduce, and anti-patterns to refuse. Does NOT contain pre-written test code (that's the bulk-writing anti-pattern /tdd refuses). When invoked against an issue (e.g. \"write a plan for #42\"), runs in **filter mode** — reads the master plan and prints only the cycles the issue references; never regenerates a divergent plan. Different from /to-issues which groups adjacent cycles into hours-to-days vertical slices for the backlog. The two chain: /write-plan first to expose the cycle list, then /to-issues to group them into shippable slices."
 ---
 
 # Write Plan
@@ -127,6 +127,14 @@ T-002 <Behavior>
 
 For each title, ask "is this user-visible? Is this stated as WHAT not HOW?" Walk the list once with the user, fixing any title that smells like implementation. Then expand into the full plan and save.
 
+**Then run the mechanical check** bundled in this skill's folder, from the project root, and fix every line it prints before telling the user the plan is ready:
+
+```bash
+<this skill dir>/scripts/check-plan.sh docs/plans/<slug>.md
+```
+
+It enforces the task contract in [`docs/skill-contracts.md` §5](../../../docs/skill-contracts.md). Prose rules drift; the script doesn't.
+
 ## Filter mode
 
 Triggered when the user invokes `/write-plan <issue#>` and the issue body contains a `## Plan tasks` block referencing a master plan.
@@ -145,6 +153,7 @@ If the master plan is missing the referenced IDs (drift), surface it: "Issue #42
 - Including helper-function or private-method tasks (they emerge from `/tdd`'s refactor step)
 - Tasks framed as "implement function X" — should be "user can observe Y"
 - Skipping the review gate to save time (the gate catches imagined-behavior tasks before they pollute execution)
+- Adversarially "hardening" the plan against risks no code has shown yet — a review of a plan with no code behind it invents risks. Put a speculative concern in `design.md` failure modes or leave it for `/tdd` to surface.
 
 ## After this skill
 

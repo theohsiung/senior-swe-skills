@@ -1,6 +1,6 @@
 ---
 name: design-like-senior
-description: Per-feature design pass that runs after `/to-prd` and before any of `/write-plan`, `/to-issues`, or `/tdd`. Walks application architecture (where the feature plugs in), module boundaries (Ousterhout deep modules), and public-interface design (signatures, not implementations) — anchoring every recommendation to the project's `docs/architecture.md` and ADRs from `/think-like-senior`. Produces `docs/features/<slug>/design.md` that downstream skills (`/write-plan`, `/to-issues`) read. Use proactively whenever the user has a PRD or issue and is asking "where does this go", "what should the API look like", "should this be a new module", "how do I structure this feature", "what files do I create", or describing the work as "feature design", "tech design doc", "design review before coding". Run once per feature. Does NOT make project-level decisions (those are `/think-like-senior`) and does NOT design class internals (those emerge from `/tdd`'s refactor step).
+description: "Per-feature design pass that runs after `/to-prd` and before any of `/write-plan`, `/to-issues`, or `/tdd`. Walks application architecture (where the feature plugs in), module boundaries (Ousterhout deep modules), and public-interface design (signatures, not implementations) — anchoring every recommendation to the project's `docs/architecture.md` and ADRs from `/think-like-senior`. Produces `docs/features/<slug>/design.md` that downstream skills (`/write-plan`, `/to-issues`) read. Use proactively whenever the user has a PRD or issue and is asking \"where does this go\", \"what should the API look like\", \"should this be a new module\", \"how do I structure this feature\", \"what files do I create\", or describing the work as \"feature design\", \"tech design doc\", \"design review before coding\". Run once per feature. Does NOT make project-level decisions (those are `/think-like-senior`) and does NOT design class internals (those emerge from `/tdd`'s refactor step)."
 ---
 
 <what-to-do>
@@ -110,9 +110,15 @@ For the owning module(s), apply Ousterhout's "deep modules":
 
 Output: a list of the public additions to the owning module's surface (function signatures, exported types). For each addition, a one-line note on why it's at the public surface vs internal.
 
+**Design it twice when a new module is introduced.** Before recommending, sketch at least two *structurally different* shapes (not two flavours of the same shape — e.g. "one `BookingScheduler` with a policy object" vs "separate `Availability` and `Reservation` modules with an event between them"). Compare them on depth: what complexity each hides from callers, and what it forces callers to know. The losing shape goes in "Considered & rejected". Skip this for field additions and small extensions of an existing module.
+
+**Screen against [DESIGN-RED-FLAGS.md](./DESIGN-RED-FLAGS.md)** — shallow module, information leakage, temporal decomposition, pass-through, split ownership, two ways to do one task, importable internals, hand-synced list. Record the screen result per new module in `design.md`.
+
 ### Step 6 — Public class / function interfaces
 
 Design the *signatures* of the public functions and the *shapes* of the types crossing module boundaries. Stop at signatures.
+
+**Write the caller's usage first.** Before any signature, write 2–3 short, realistic call sites as they'll appear in the *consumer's* code (the HTTP handler, the CLI command, the other module). Then derive the signatures from them. When the usage and the signature disagree, change the signature — the usage is what callers will live with. Keep the call sites in `design.md`; `/write-plan` uses them as test-framing hints.
 
 Capture for each public function:
 
@@ -183,6 +189,7 @@ Do NOT file ADRs for routine interface design, naming choices, or "we picked the
 
 When the user pushes back on a recommendation, the same rules as `/think-like-senior` apply:
 
+- **Settle facts by running something.** If the disagreement is about a fact you could observe (does the ORM support this? how slow is the query? does the library emit events?), run a throwaway probe and bring the result back instead of debating it.
 - New constraint or fact → update Phase A's "Project context" section, then re-recommend
 - Different mapping of an existing constraint → engage on the merits
 - Vibes only → ask "Which architectural decision or PRD requirement would have to be different for me to recommend that?" — don't capitulate without an answer
@@ -196,7 +203,7 @@ The biggest failure mode of a feature-design skill is over-engineering small fea
 - **Tiny feature (typo fix, label change, copy edit)** — skip everything except a one-line note in `design.md`. Optionally skip `design.md` entirely if `/tdd` can take the PRD directly.
 - **Pure UI polish (spacing, color, motion)** — out of scope; this skill doesn't design pixels. Send to a frontend-design skill.
 - **Feature that's "just like X but for Y"** — read X's existing design doc, write a one-section diff doc, don't repeat the full pattern.
-- **Bug fix where the fix is local** — out of scope; go straight to `/diagnose` then `/tdd`.
+- **Bug fix where the fix is local** — out of scope; go straight to `/diagnose` (it's self-contained and writes its own regression test — don't chain `/tdd` after it).
 
 When skipping, say so out loud with the constraint that drove the skip. The user can override.
 

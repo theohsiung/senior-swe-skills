@@ -1,0 +1,23 @@
+{
+  "name": "senior-swe-skills",
+  "owner": {
+    "name": "theohsiung",
+    "url": "https://github.com/theohsiung"
+  },
+  "description": "Senior-engineer workflow skills, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "senior-swe-skills",
+      "source": "./",
+      "description": "Senior-engineer workflow skills: architecture, feature design, behavior-driven TDD plans, evidence-gated TDD, code review, diagnosis.",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "skills",
+        "architecture",
+        "tdd",
+        "code-review"
+      ]
+    }
+  ]
+}

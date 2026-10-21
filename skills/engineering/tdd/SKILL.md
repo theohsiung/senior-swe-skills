@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Execute test-first development cycle by cycle. In plan-mode, read a behavior plan from /write-plan and derive the test for each cycle at execution time (the plan describes WHAT to test, not the test code itself — pre-writing tests is the bulk-writing anti-pattern). In self-directed mode, plan as you go. Tests verify behavior through public interfaces; never internal collaborators. Use when user wants to build features or fix bugs test-first, mentions red-green-refactor, or asks for behavior-driven tests.
+description: "Execute test-first development cycle by cycle. In plan-mode, read a behavior plan from /write-plan and derive the test for each cycle at execution time (the plan describes WHAT to test, not the test code itself — pre-writing tests is the bulk-writing anti-pattern). In self-directed mode, plan as you go. Tests verify behavior through public interfaces; never internal collaborators. Use when user wants to build features or fix bugs test-first, mentions red-green-refactor, or asks for behavior-driven or integration tests."
 ---
 
 # Test-Driven Development
@@ -58,6 +58,14 @@ After each batch, stop and report:
   - `/improve-codebase-architecture` if the affected interface already exists in code (typical mid-feature case — code is real, the seam is too narrow)
   - `/design-like-senior` only if the interface is purely on paper and not yet implemented
 
+**Stop and route back to design when a pattern shows up across cycles** (one awkward cycle is noise; the same awkwardness twice is the design talking):
+- The same shape of workaround appears in two or more cycles (a flag threaded through, a special case re-added, a helper copied).
+- Types need escape hatches (`any`, casts, `# type: ignore`, `!`) to make the planned interface compile.
+- Callers have to know the module's internal rules to use the public interface correctly.
+- Two cycles deviate from `design.md` in the same direction.
+
+Route it the same way as the seam case above, with the concrete evidence (cycle IDs, the repeated workaround): `/improve-codebase-architecture` once the interface exists in code (the usual mid-feature case), `/design-like-senior` in revision mode only while it's still on paper. Don't paper over it in the refactor step.
+
 Don't guess through blockers — ask.
 
 ### 2'. Self-directed execution (no plan)
@@ -66,6 +74,7 @@ When no plan exists, plan as you go:
 
 **Plan briefly with the user:**
 - What public interface needs to change?
+- Which seams will tests live at? Write them down and confirm with the user before the first test. Give each proposed seam a one-line note on **what it catches and what it misses** — that trade-off is how testing effort lands on critical paths instead of every edge case.
 - Which behaviors matter most? (You can't test everything — prioritize critical paths and complex logic.)
 - Identify opportunities for [deep modules](deep-modules.md) (small interface, deep implementation)
 - Design interfaces for [testability](interface-design.md)
@@ -108,13 +117,15 @@ After all tests pass (plan mode: between batches; self-directed: after the loop)
 When all tasks/behaviors are complete:
 
 1. Run the full test suite
-2. Report pass/fail and coverage
-3. Ask the user before committing anything not already committed
+2. **Prove it on the real surface.** A green suite is evidence level 4 at best (see [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md)). Drive the feature once through its system-public entry point — the real CLI command, a `curl` against the running server, the UI flow — using the recipes in `docs/agents/verify.md` if it exists. Paste the command and its (redacted) output. If you can't reach the real surface, report the result as not verified (§8 rule 2), not as done.
+3. Report pass/fail, coverage, and the evidence level you reached
+4. Ask the user before committing anything not already committed
 
 After commit, suggest the next step based on what happened during the cycle:
 
 - **A test was hard to write because the seam was wrong** → recommend `/improve-codebase-architecture` against the affected module before the next feature.
 - **A test surfaced a regression elsewhere** → recommend `/diagnose` for the regression, separate from this feature's commits.
+- **Before merging / opening a PR** → recommend `/code-review` against the branch's base — the independent check from §8 rule 5, against both coding standards and the spec (PRD + `design.md` + plan).
 - **The behavior list completed cleanly** → next feature or ticket. Loop back to `/to-prd` (new feature) or pick the next issue from `/triage`'s `ready-for-agent` queue.
 
 ---
@@ -160,10 +171,15 @@ RIGHT (vertical):
 
 In plan mode this is enforced by the plan's task granularity — each task is one RED→GREEN cycle. The plan describes the _behavior_ for each cycle; you write the test for that cycle when you reach it, not in advance. In self-directed mode, you enforce vertical slicing yourself.
 
+### Tautological tests
+
+The assertion recomputes the expected value the way the code does (`expect(add(a, b)).toBe(a + b)`, a snapshot derived by hand the same way, a constant asserted equal to itself), so it passes by construction and can never disagree with the code. Expected values must come from an **independent source of truth**: a known-good literal, a worked example, the spec. See [tests.md](tests.md).
+
 ### Per-test checklist
 
 ```
 [ ] Test describes behavior, not implementation
+[ ] Expected value comes from an independent source (not recomputed like the code)
 [ ] Test uses public interface only
 [ ] Test would survive internal refactor
 [ ] Code is minimal for this test

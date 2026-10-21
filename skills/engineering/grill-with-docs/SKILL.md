@@ -1,15 +1,13 @@
 ---
 name: grill-with-docs
-description: Domain-first grilling session — stress-test a plan against the project's domain language and documented decisions, sharpening terminology and updating CONTEXT.md/ADRs inline. Run before /to-prd or /design-like-senior whenever new domain concepts emerge or existing terminology gets fuzzy. Focus is business/domain language and load-bearing decisions, not technical module design — for module/interface design use /design-like-senior.
+description: "Domain-first grilling session — stress-test a plan against the project's domain language and documented decisions, sharpening terminology and updating CONTEXT.md/ADRs inline. Run before /to-prd or /design-like-senior whenever new domain concepts emerge or existing terminology gets fuzzy. Focus is business/domain language and load-bearing decisions, not technical module design — for module/interface design use /design-like-senior."
 ---
 
 <what-to-do>
 
-Interview me relentlessly about every aspect of this plan **at the domain level** until we reach a shared understanding of the business concepts and their relationships. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview me relentlessly about every aspect of this plan **at the domain level** until we reach a shared understanding of the business concepts and their relationships.
 
-Ask the questions one at a time, waiting for feedback on each question before continuing.
-
-If a question can be answered by exploring the codebase, explore the codebase instead.
+**Call the Skill tool with "grilling"** for the questioning mechanics: work the design tree in rounds over the frontier, give a recommended answer for every question (worded so "yes" accepts it), look up facts yourself (codebase, docs) instead of asking, and don't act until the user confirms shared understanding. This skill adds the domain scope and the docs below on top of it. `grilling`'s "don't act until the user confirms" covers acting on the *plan*; the `CONTEXT.md` / ADR updates below are part of the grilling itself and still happen inline, as each term or decision lands.
 
 **Scope guardrail:** focus on domain meaning (what an "Order" is, when it gets "cancelled", what "tenant" means here). Stop at terminology and load-bearing domain decisions — module placement, interface design, and schema details belong in `/design-like-senior`.
 

@@ -1,6 +1,6 @@
 ---
 name: where-am-i
-description: Use when resuming work after a break, starting a fresh session on an in-progress project, or unsure which senior-swe skill to run next. Scans the canonical workflow artifacts (`docs/architecture.md`, `docs/adr/`, `CONTEXT.md`, `docs/features/<slug>/design.md`, `docs/plans/<slug>.md`), open issues with their `## Plan tasks` ranges, and recent git activity, then reports what's done, what's partial or stale, and which skill (`/think-like-senior`, `/grill-with-docs`, `/to-prd`, `/design-like-senior`, `/write-plan`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/improve-codebase-architecture`) is the right next step. Read-only by design — never writes a state file, because artifacts on disk are the single source of truth. Triggered by phrases like "where did we leave off", "what should I run next", "is this feature ready for /tdd", "what's the status of <feature>".
+description: "Use when resuming work after a break, starting a fresh session on an in-progress project, or unsure which senior-swe skill to run next. Scans the canonical workflow artifacts (`docs/architecture.md`, `docs/adr/`, `CONTEXT.md`, `docs/features/<slug>/design.md`, `docs/plans/<slug>.md`), open issues with their `## Plan tasks` ranges, and recent git activity, then reports what's done, what's partial or stale, and which skill (`/think-like-senior`, `/grill-with-docs`, `/to-prd`, `/design-like-senior`, `/write-plan`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/improve-codebase-architecture`) is the right next step. Read-only by design — never writes a state file, because artifacts on disk are the single source of truth. Triggered by phrases like \"where did we leave off\", \"what should I run next\", \"is this feature ready for /tdd\", \"what's the status of <feature>\"."
 ---
 
 <what-to-do>
@@ -54,7 +54,8 @@ issues exist, all in needs-triage?                 → /triage    (drain the que
 issues triaged ready-for-agent / ready-for-human,  → /write-plan <issue#>  (filter mode if
   none in progress?                                  master plan present), then /tdd
 plan exists, cycles not covered by tests?          → /tdd <slug>  (resume from first uncovered)
-all cycles green, tests passing?                   → next feature, or /improve-codebase-architecture
+all cycles green, not yet reviewed?               → /code-review against the branch base
+all cycles green, reviewed, tests passing?         → next feature, or /improve-codebase-architecture
 multiple issues blocked on same parent?            → list dependency chain; ask which to unblock
 hard bug surfaced?                                 → /diagnose  (self-contained — does NOT chain to /tdd)
 ```
@@ -71,6 +72,10 @@ Surface these as caveats — never silently assume the artifact is current:
 - `design.md` references a module path that no longer exists.
 - `CONTEXT.md` term doesn't appear in any source file.
 - Plan has behaviors that look implemented (test exists) but the plan itself wasn't ticked.
+- `../write-plan/scripts/check-plan.sh docs/plans/<slug>.md` (path relative to this skill's folder) prints violations of the plan contract. It only reads the plan.
+- `docs/agents/verify.md` is missing or still marked DRAFT → `/tdd` and `/diagnose` can't reach evidence level 5; suggest finishing it via `/setup-senior-swe-skills`.
+
+**Verify inherited claims once.** When a cycle *looks* done (test file exists, commit message says so), run that test once before reporting it as done — running tests doesn't modify any artifact, so it stays within this skill's read-only rule. Don't redo the work; just confirm the claim. Report unrun claims as "looks covered (evidence level 1–2, unverified)" per [`docs/skill-contracts.md` §8](../../../docs/skill-contracts.md).
 
 For stale architecture, recommend `/think-like-senior` in **update mode** (it auto-detects existing `architecture.md` and only discusses gaps).
 

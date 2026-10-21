@@ -1,6 +1,6 @@
 ---
 name: setup-senior-swe-skills
-description: Sets up an `## Agent skills` block in AGENTS.md and/or CLAUDE.md plus `docs/agents/` so the engineering skills know this repo's project doc paths, issue tracker (GitHub, GitLab, or local markdown), triage label vocabulary, and domain doc layout. Run once per repo before using any other engineering skill, or whenever those skills appear to be missing config context.
+description: "Sets up an `## Agent skills` block in AGENTS.md and/or CLAUDE.md plus `docs/agents/` so the engineering skills know this repo's project doc paths, issue tracker (GitHub, GitLab, or local markdown), triage label vocabulary, domain doc layout, and how to verify a change on the real running system. Run once per repo before using any other engineering skill, or whenever those skills appear to be missing config context."
 disable-model-invocation: true
 ---
 
@@ -12,6 +12,7 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Issue tracker** — where issues live (GitHub, GitLab, or local markdown out of the box)
 - **Triage labels** — the strings used for the five canonical triage roles
 - **Domain docs layout** — single-context vs multi-context (the same info as paths, but in domain terms — kept for backwards compatibility with skills that read `domain.md`)
+- **Verification recipe** — how an agent launches the system, drives a feature through its real entry point, and reads the evidence (used by `/tdd`, `/diagnose`, `/triage`)
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
@@ -24,6 +25,7 @@ See [`docs/skill-contracts.md` §1, §6, §7](../../../docs/skill-contracts.md) 
 - **`docs/agents/issue-tracker.md`** — which tracker the consuming skills should read/write, and the CLI/convention to use.
 - **`docs/agents/triage-labels.md`** — mapping from canonical triage roles to the label strings actually used in the tracker.
 - **`docs/agents/domain.md`** — single-context vs multi-context layout summary (consumer rules for reading domain docs).
+- **`docs/agents/verify.md`** — Launch / Doctor / Drive / Evidence / Cleanup recipe plus a short feature map. See [verify.md](./verify.md).
 
 This skill does NOT modify code, write `docs/architecture.md`, or touch the issue tracker. It only writes config files that other skills read.
 
@@ -60,7 +62,7 @@ Show the user the resolved YAML before moving on. They can override any key.
 
 **Section B — Issue tracker.**
 
-> Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-issues`, `triage`, `to-prd`, and `qa` read from and write to it — they need to know whether to call `gh issue create`, write a markdown file under `.scratch/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
+> Explainer: The "issue tracker" is where issues live for this repo. Skills like `to-issues`, `triage`, and `to-prd` read from and write to it — they need to know whether to call `gh issue create`, write a markdown file under `.scratch/`, or follow some other workflow you describe. Pick the place you actually track work for this repo.
 
 Default posture: these skills were designed for GitHub. If a `git remote` points at GitHub, propose that. If a `git remote` points at GitLab (`gitlab.com` or a self-hosted host), propose GitLab. Otherwise (or if the user prefers), offer:
 
@@ -81,7 +83,7 @@ The five canonical roles:
 - `ready-for-human` — needs human implementation
 - `wontfix` — will not be actioned
 
-Default: each role's string equals its name. Ask the user if they want to override any. If their issue tracker has no existing labels, the defaults are fine.
+Default: each role's string equals its name. Ask as **one yes/no question** ("Use the default label names? (yes / tell me which to rename)") rather than role by role. If the tracker is GitHub or GitLab and a mapped label doesn't exist yet, offer to create it (`gh label create` / `glab label create`) in Step 4 so `/triage` never applies a missing label.
 
 **Section D — Domain docs layout.**
 
@@ -92,12 +94,22 @@ Confirm the layout:
 - **Single-context** — one `CONTEXT.md` + `docs/adr/` at the repo root. Most repos are this.
 - **Multi-context** — `CONTEXT-MAP.md` at the root pointing to per-context `CONTEXT.md` files (typically a monorepo).
 
+**Section E — Verification recipe.**
+
+> Explainer: A green test suite proves the code does what the tests say. It doesn't prove the feature works when a real user runs it. `/tdd` and `/diagnose` finish by driving the change through the real entry point (CLI, HTTP, UI). This section records *how* — so every session doesn't rediscover how to boot the app.
+
+**Interview the repo, not the user.** Read `package.json` scripts / `Makefile` / `justfile` / `docker-compose.yml` / `README` / CI config and draft the recipe from what's there. Only ask the user for what the repo can't tell you (credentials live where? which seed data?).
+
+Draft the five sections from [verify.md](./verify.md): **Launch** (one command to boot), **Doctor** (one command that proves it's up), **Drive** (how to exercise a feature: CLI invocation, `curl`, headless browser), **Evidence** (where to read the result: stdout, response body, logs, DB via the app's own read path), **Cleanup**. Add a **feature map** of the 3–5 most important features, each with the observable end state that proves it works.
+
+**Prove it before writing it.** Run Launch → Doctor → one Drive from the map → Cleanup once. A recipe that was never executed is a draft — say so in the file header if you couldn't run it (missing credentials, no Docker), and mark which steps are unverified. For a pure library with no runnable surface, write a one-line `verify.md` saying "system-public = the package's exported API; drive it via the test runner" and stop.
+
 ### 3. Confirm and edit
 
 Show the user a draft of:
 
 - The `## Agent skills` block to add to `CLAUDE.md` / `AGENTS.md` (see step 4 for the dual-file rules)
-- The contents of `docs/agents/paths.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/agents/domain.md`
+- The contents of `docs/agents/paths.md`, `docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `docs/agents/domain.md`, `docs/agents/verify.md`
 
 Let them edit before writing.
 
@@ -135,9 +147,13 @@ The block:
 ### Domain docs
 
 [one-line summary of layout — "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+
+### Verification
+
+[one-line summary — e.g. "`make dev` + curl against :8080"]. See `docs/agents/verify.md`.
 ```
 
-Then write the four docs files using the seed templates in this skill folder as a starting point:
+Then write the five docs files using the seed templates in this skill folder as a starting point:
 
 - [paths.md](./paths.md) — project doc paths (single-root or monorepo)
 - [issue-tracker-github.md](./issue-tracker-github.md) — GitHub issue tracker
@@ -145,6 +161,7 @@ Then write the four docs files using the seed templates in this skill folder as 
 - [issue-tracker-local.md](./issue-tracker-local.md) — local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md) — label mapping
 - [domain.md](./domain.md) — domain doc consumer rules + layout
+- [verify.md](./verify.md) — verification recipe (fill from the repo, then run it once)
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 

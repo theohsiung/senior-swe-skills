@@ -29,7 +29,7 @@ For a fresh project, the only input is the conversation. For an existing project
 Create lazily — only when there's something to write:
 
 - `docs/architecture.md` — single snapshot of the architecture (constraints, system shape, data model patterns, resilience defaults).
-- `docs/adr/NNNN-*.md` — one ADR per load-bearing decision. File via the protocol in [grill-with-docs/ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md) (number allocation goes through `scripts/next-adr-number.sh`).
+- `docs/adr/NNNN-*.md` — one ADR per load-bearing decision. File via the protocol in [grill-with-docs/ADR-FORMAT.md](../grill-with-docs/ADR-FORMAT.md) (number allocation goes through `grill-with-docs/scripts/next-adr-number.sh`).
 - Linter / formatter config files for the detected language (Step 8, mechanical).
 - Observability stack boilerplate for the detected language (Step 7a, mechanical).
 
